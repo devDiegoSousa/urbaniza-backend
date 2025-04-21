@@ -1,18 +1,17 @@
 package com.urbaniza.authapi.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-
-public class AuthRequestDTO {
-
-    @Email(message = "Email inválido")
-    @NotBlank(message = "Email é obrigatório")
+public class SignupRequestDTO {
     private String email;
-
-    @NotBlank(message = "Senha é obrigatória")
     private String password;
 
-    // Getters e Setters
+    public SignupRequestDTO() {
+    }
+
+    public SignupRequestDTO(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
 
