@@ -39,7 +39,7 @@ public class AuthController {
         if (token == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas.");
         }
-        return ResponseEntity.ok(new SigninResponseDTO(token.getToken()));
+        return ResponseEntity.ok(new SigninResponseDTO(token.getToken(), token.getExpTime()));
     }
 
     @PostMapping("/check") // Rota que confere se o token de login gerado ainda é valido
