@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.urbaniza.authapi.model.Token;
 import com.urbaniza.authapi.model.User;
@@ -14,13 +17,16 @@ import com.urbaniza.authapi.repository.TokenRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService {
     @Autowired
     private UserRepository ur;
     @Autowired
     private TokenRepository tknRepository;
-    private Integer TOKEN_TTL = 25;
+    private Integer TOKEN_TTL = 60*2;
 
+
+
+    // Registra um novo usuário no sistema.
     public void signup(String email, String password) throws Exception {
         User user = new User();
         user.setEmail(email);
@@ -61,4 +67,8 @@ public class AuthService {
         return found.isPresent() && found.get().getExpTime() >Instant.now().toEpochMilli();
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
+    }
 }
