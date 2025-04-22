@@ -1,19 +1,19 @@
 package com.urbaniza.authapi.repository;
 
+import com.urbaniza.authapi.enums.ReportStatus;
 import com.urbaniza.authapi.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
     List<Report> findByUserId(Integer userId);
 
-    List<Report> findByStatus(String status);
+    Optional<Report> findById(Long id);
 
-    // Você pode adicionar mais métodos de consulta conforme necessário
-    // Exemplo:
-    // List<Report> findByLatitudeBetweenAndLongitudeBetween(Double minLat, Double maxLat, Double minLng, Double maxLng);
+    List<Report> findByStatus(ReportStatus status);
 }

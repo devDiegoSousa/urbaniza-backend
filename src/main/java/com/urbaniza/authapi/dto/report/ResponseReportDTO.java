@@ -1,73 +1,29 @@
-// Model: com.urbaniza.authapi.model.Report.java
-package com.urbaniza.authapi.model;
+// DTO: com.urbaniza.authapi.dto.report.ReportResponseDTO.java
+package com.urbaniza.authapi.dto.report;
 
 import com.urbaniza.authapi.enums.ReportStatus;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
-@Table(name = "reports")
-public class Report {
+public class ResponseReportDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @NotBlank
-    @Size(max = 255, message = "Title cannot exceed 255 characters")
     private String title;
-
-    @NotBlank(message = "Description is required")
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
-
-    @NotNull(message = "Latitude is required")
-    @Column(nullable = false)
     private Double latitude;
-
-    @NotNull(message = "Longitude is required")
-    @Column(nullable = false)
     private Double longitude;
-
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
     private LocalDateTime creationDateTime;
-
-    @Column
     private String photoUrl;
-
-    @Column(length = 255)
     private String photoPublicId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ReportStatus status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "User ID is required")
-    private User user;
-
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Integer userId;
     private boolean anonymous;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.status == null) {
-            this.status = ReportStatus.NEW;
-        }
+    public ResponseReportDTO() {
     }
 
-    public Report() {
-    }
-
-    public Report(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, User user, boolean anonymous) {
+    public ResponseReportDTO(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, Integer userId, boolean anonymous) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -77,7 +33,7 @@ public class Report {
         this.photoUrl = photoUrl;
         this.photoPublicId = photoPublicId;
         this.status = status;
-        this.user = user;
+        this.userId = userId;
         this.anonymous = anonymous;
     }
 
@@ -153,12 +109,12 @@ public class Report {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public boolean isAnonymous() {
@@ -173,18 +129,18 @@ public class Report {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Report report = (Report) o;
-        return anonymous == report.anonymous && Objects.equals(id, report.id) && Objects.equals(title, report.title) && Objects.equals(description, report.description) && Objects.equals(latitude, report.latitude) && Objects.equals(longitude, report.longitude) && Objects.equals(creationDateTime, report.creationDateTime) && Objects.equals(photoUrl, report.photoUrl) && Objects.equals(photoPublicId, report.photoPublicId) && status == report.status && Objects.equals(user, report.user);
+        ResponseReportDTO that = (ResponseReportDTO) o;
+        return anonymous == that.anonymous && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(latitude, that.latitude) && Objects.equals(longitude, that.longitude) && Objects.equals(creationDateTime, that.creationDateTime) && Objects.equals(photoUrl, that.photoUrl) && Objects.equals(photoPublicId, that.photoPublicId) && status == that.status && Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, latitude, longitude, creationDateTime, photoUrl, photoPublicId, status, user, anonymous);
+        return Objects.hash(id, title, description, latitude, longitude, creationDateTime, photoUrl, photoPublicId, status, userId, anonymous);
     }
 
     @Override
     public String toString() {
-        return "Report{" +
+        return "ReportResponseDTO{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
@@ -194,7 +150,7 @@ public class Report {
                 ", photoUrl='" + photoUrl + '\'' +
                 ", photoPublicId='" + photoPublicId + '\'' +
                 ", status=" + status +
-                ", user=" + (anonymous ? "Anonymous" : user.getId()) +
+                ", userId=" + userId +
                 ", anonymous=" + anonymous +
                 '}';
     }
