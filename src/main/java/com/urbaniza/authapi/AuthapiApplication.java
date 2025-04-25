@@ -2,6 +2,8 @@ package com.urbaniza.authapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 @SpringBootApplication
 public class AuthapiApplication {
@@ -10,4 +12,9 @@ public class AuthapiApplication {
 		SpringApplication.run(AuthapiApplication.class, args);
 	}
 
+
+	@Bean(name = "multipartResolver")
+	public StandardServletMultipartResolver multipartResolver() {
+		return new StandardServletMultipartResolver();
+	}
 }

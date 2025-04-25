@@ -1,4 +1,3 @@
-// Service: com.urbaniza.authapi.service.ReportService.java
 package com.urbaniza.authapi.service;
 
 import com.urbaniza.authapi.dto.report.CreateReportDTO;
@@ -20,6 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
+
 @Service
 public class ReportService {
 
@@ -29,7 +30,7 @@ public class ReportService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired(required = false) // CloudinaryService é opcional se não houver foto
+    @Autowired(required = false)
     private CloudinaryService cloudinaryService;
 
     @Transactional
@@ -58,17 +59,29 @@ public class ReportService {
         return convertToResponseDTO(savedReport);
     }
 
+    // Return a report by its Id
     public Optional<ResponseReportDTO> findReportById(Long id) {
         return reportRepository.findById(id)
                 .map(this::convertToResponseDTO);
     }
 
+    // Returns all reports created
     public List<ResponseReportDTO> findAllReports() {
+
         return reportRepository.findAll().stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    // Returns all reports with the same userId
+    public List<ResponseReportDTO> findReportByUserId(Long id) {
+        return reportRepository.findByUserId(id)
+                .stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Create a response for any request CreateReport
     private ResponseReportDTO convertToResponseDTO(Report report) {
         ResponseReportDTO responseDTO = new ResponseReportDTO();
         responseDTO.setId(report.getId());
@@ -84,6 +97,8 @@ public class ReportService {
         responseDTO.setAnonymous(report.isAnonymous());
         return responseDTO;
     }
+
+
 
     // Outros métodos do serviço (atualização, exclusão, etc.) seriam implementados aqui
 }

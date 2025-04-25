@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    List<Report> findByUserId(Integer userId);
+    List<Report> findByUserId(Long userId);
 
     Optional<Report> findById(Long id);
 

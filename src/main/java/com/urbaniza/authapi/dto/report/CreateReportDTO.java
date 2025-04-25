@@ -102,13 +102,27 @@ public class CreateReportDTO {
 
     @Override
     public String toString() {
-        return "CreateReportDTO{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", userId=" + userId +
-                ", anonymous=" + anonymous +
-                '}';
+        if (!anonymous){
+            return "CreateReportDTO{" +
+                    "title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", latitude=" + latitude +
+                    ", longitude=" + longitude +
+                    ", userId=" + userId +
+                    ", anonymous=" + anonymous +
+                    '}';
+
+            // TODO Garantir que os dados do usuário anónimo não sejam vinculados
+        } else{
+            return "CreateReportDTO{" +
+                    "title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", latitude=" + latitude +
+                    ", longitude=" + longitude +
+                    ", userId=" + userId +
+                    ", anonymous=" + anonymous +
+                    '}';
+        }
+
     }
 }

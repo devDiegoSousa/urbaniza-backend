@@ -1,4 +1,3 @@
-// Controller: com.urbaniza.authapi.controller.ReportController.java
 package com.urbaniza.authapi.controller;
 
 import com.urbaniza.authapi.dto.report.CreateReportDTO;
@@ -12,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
+import com.fasterxml.jackson.databind.ObjectMapper; // Importe o ObjectMapper
 import java.io.IOException;
 import java.util.List;
 
@@ -25,19 +24,29 @@ public class ReportController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseReportDTO> createReport(
-            @Valid @RequestPart("report") CreateReportDTO createReportDTO,
+            @RequestParam("report") String reportJson, // Alterado para @RequestParam
             @RequestPart(value = "photo", required = false) MultipartFile photo) {
 
-        System.out.println("Recebida requisição POST /reports");
-        System.out.println("CreateReportDTO: " + createReportDTO);
+        System.out.println("Recebida requisição POST /reports (TESTE)");
+        System.out.println("reportJson: " + reportJson);
+
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
+            CreateReportDTO createReportDTO = objectMapper.readValue(reportJson, CreateReportDTO.class);
             ResponseReportDTO createdReport = reportService.createReport(createReportDTO, photo);
             return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not parse report JSON: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not upload photo.");
         }
+    }
+
+    // test form-data/multipart
+    @PostMapping(value = "/test-multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> testMultipart(@RequestPart("data") String data) {
+        System.out.println("Dados recebidos: " + data);
+        return ResponseEntity.ok("Dados recebidos com sucesso: " + data);
     }
 
     @GetMapping("/{id}")
@@ -45,6 +54,14 @@ public class ReportController {
         return reportService.findReportById(id)
                 .map(report -> new ResponseEntity<>(report, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/s/{userId}")
+    public ResponseEntity<List<ResponseReportDTO>> getReportByUserId(@PathVariable Long userId) {
+        List<ResponseReportDTO> reports = reportService.findReportByUserId(userId);
+        return reports.isEmpty() ?
+                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(reports, HttpStatus.OK);
     }
 
     @GetMapping

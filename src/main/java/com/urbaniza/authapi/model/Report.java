@@ -84,7 +84,6 @@ public class Report {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -92,7 +91,6 @@ public class Report {
     public String getTitle() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title = title;
     }
@@ -100,7 +98,6 @@ public class Report {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }
@@ -108,7 +105,6 @@ public class Report {
     public Double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
@@ -116,7 +112,6 @@ public class Report {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
@@ -124,7 +119,6 @@ public class Report {
     public LocalDateTime getCreationDateTime() {
         return creationDateTime;
     }
-
     public void setCreationDateTime(LocalDateTime creationDateTime) {
         this.creationDateTime = creationDateTime;
     }
@@ -132,7 +126,6 @@ public class Report {
     public String getPhotoUrl() {
         return photoUrl;
     }
-
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }
@@ -140,7 +133,6 @@ public class Report {
     public String getPhotoPublicId() {
         return photoPublicId;
     }
-
     public void setPhotoPublicId(String photoPublicId) {
         this.photoPublicId = photoPublicId;
     }
@@ -148,7 +140,6 @@ public class Report {
     public ReportStatus getStatus() {
         return status;
     }
-
     public void setStatus(ReportStatus status) {
         this.status = status;
     }
@@ -156,7 +147,6 @@ public class Report {
     public User getUser() {
         return user;
     }
-
     public void setUser(User user) {
         this.user = user;
     }
@@ -164,7 +154,6 @@ public class Report {
     public boolean isAnonymous() {
         return anonymous;
     }
-
     public void setAnonymous(boolean anonymous) {
         this.anonymous = anonymous;
     }

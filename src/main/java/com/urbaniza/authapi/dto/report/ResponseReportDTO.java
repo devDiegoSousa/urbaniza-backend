@@ -40,7 +40,6 @@ public class ResponseReportDTO {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -48,7 +47,6 @@ public class ResponseReportDTO {
     public String getTitle() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title = title;
     }
@@ -56,7 +54,6 @@ public class ResponseReportDTO {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }
@@ -64,7 +61,6 @@ public class ResponseReportDTO {
     public Double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
@@ -72,7 +68,6 @@ public class ResponseReportDTO {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
@@ -80,7 +75,6 @@ public class ResponseReportDTO {
     public LocalDateTime getCreationDateTime() {
         return creationDateTime;
     }
-
     public void setCreationDateTime(LocalDateTime creationDateTime) {
         this.creationDateTime = creationDateTime;
     }
@@ -88,7 +82,6 @@ public class ResponseReportDTO {
     public String getPhotoUrl() {
         return photoUrl;
     }
-
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }
@@ -96,7 +89,6 @@ public class ResponseReportDTO {
     public String getPhotoPublicId() {
         return photoPublicId;
     }
-
     public void setPhotoPublicId(String photoPublicId) {
         this.photoPublicId = photoPublicId;
     }
@@ -104,7 +96,6 @@ public class ResponseReportDTO {
     public ReportStatus getStatus() {
         return status;
     }
-
     public void setStatus(ReportStatus status) {
         this.status = status;
     }
@@ -112,7 +103,6 @@ public class ResponseReportDTO {
     public Integer getUserId() {
         return userId;
     }
-
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
@@ -120,16 +110,15 @@ public class ResponseReportDTO {
     public boolean isAnonymous() {
         return anonymous;
     }
-
     public void setAnonymous(boolean anonymous) {
         this.anonymous = anonymous;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ResponseReportDTO that = (ResponseReportDTO) o;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ResponseReportDTO that = (ResponseReportDTO) object;
         return anonymous == that.anonymous && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(latitude, that.latitude) && Objects.equals(longitude, that.longitude) && Objects.equals(creationDateTime, that.creationDateTime) && Objects.equals(photoUrl, that.photoUrl) && Objects.equals(photoPublicId, that.photoPublicId) && status == that.status && Objects.equals(userId, that.userId);
     }
 
