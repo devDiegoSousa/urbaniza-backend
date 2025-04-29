@@ -17,7 +17,7 @@ public class AuthService {
     private UserRepository UserRepository;
     @Autowired
     private TokenRepository TokenRepository;
-    private Integer TOKEN_TTL = 25;
+    private Integer TOKEN_TTL = 30;
 
     public void signup(String email, String password) throws Exception {
         User user = new User();
