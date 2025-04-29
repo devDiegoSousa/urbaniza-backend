@@ -3,6 +3,7 @@ package com.urbaniza.authapi.controller;
 import com.urbaniza.authapi.dto.request.SigninRequestDTO;
 import com.urbaniza.authapi.dto.request.SignupRequestDTO;
 import com.urbaniza.authapi.dto.response.SigninResponseDTO;
+import com.urbaniza.authapi.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/signup") // Rota responsavel pelo registro do user
     public ResponseEntity<?> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
 
         try {
             authService.signup(signupRequestDTO.getEmail(), signupRequestDTO.getPassword());
+//            emailService.enviarEmailTexto("email", signupRequestDTO.getEmail(), "oi");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
