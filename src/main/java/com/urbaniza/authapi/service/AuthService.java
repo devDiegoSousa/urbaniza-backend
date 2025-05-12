@@ -31,6 +31,8 @@ public class AuthService {
         User user = new User();
         user.setEmail(signupRequestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
+        user.setFirstName(signupRequestDTO.getFirstName());
+        user.setLastName(signupRequestDTO.getLastName());
 
         Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
 
@@ -42,8 +44,12 @@ public class AuthService {
     public String signin(SigninRequestDTO signinRequestDTO) {
         Optional<User> userFound = userRepository.findByEmail(signinRequestDTO.getEmail());
         if (userFound.isPresent() && passwordEncoder.matches(signinRequestDTO.getPassword(), userFound.get().getPassword())) {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userFound.get(), null, userFound.get().getAuthorities());
+            // Criando o token de autenticação com email e senha (a senha será 'null' após a verificação)
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    signinRequestDTO.getEmail(), signinRequestDTO.getPassword(), userFound.get().getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
             return jwtUtils.generateJwtToken(authentication);
         }
         return null;

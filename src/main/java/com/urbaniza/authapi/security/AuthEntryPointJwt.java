@@ -38,11 +38,8 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         // Regista o erro
         logger.error("Resposta não autorizada: {}", authException.getMessage());
 
-        // Define o tipo de conteúdo da resposta para JSON
         response.setContentType(MediaType.APPLICATION_JSON_VALUE); // Usar MediaType
-        // Define o código de estado da resposta para 401 (Não Autorizado)
         response.setStatus(HttpStatus.UNAUTHORIZED.value());  // Usar HttpStatus
-        // Escreve a mensagem de erro no corpo da resposta em formato JSON
         response.getOutputStream().println("{ \"error\": \"" + authException.getMessage() + "\" }");
     }
 }

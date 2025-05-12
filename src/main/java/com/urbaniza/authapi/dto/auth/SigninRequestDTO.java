@@ -13,6 +13,8 @@ public class SigninRequestDTO {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+
+
     public SigninRequestDTO() {
     }
 
@@ -32,7 +34,6 @@ public class SigninRequestDTO {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }

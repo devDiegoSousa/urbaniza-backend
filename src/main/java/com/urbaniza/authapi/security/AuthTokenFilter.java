@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.urbaniza.authapi.service.UserDetailsServiceImpl;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 /**
  * Filtro para interceptar e validar o token JWT em cada requisição.
@@ -29,6 +30,17 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    private static final List<String> PUBLIC_URLS = List.of(
+            "/auth/signup",
+            "/auth/signin"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return PUBLIC_URLS.stream().anyMatch(path::equals);
+    }
+
     /**
      * Intercepta cada requisição para validar o token JWT.
      *
@@ -42,6 +54,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            System.out.println("AuthTokenFilter");
+
             // 1. Obtém o token JWT do cabeçalho da requisição
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
