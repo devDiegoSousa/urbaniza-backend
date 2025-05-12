@@ -23,14 +23,14 @@ public class CreateReportDTO {
     private Double longitude;
 
     @NotNull(message = "User ID is required")
-    private Integer userId;
+    private Long userId;
 
     private boolean anonymous;
 
     public CreateReportDTO() {
     }
 
-    public CreateReportDTO(String title, String description, Double latitude, Double longitude, Integer userId, boolean anonymous) {
+    public CreateReportDTO(String title, String description, Double latitude, Double longitude, Long userId, boolean anonymous) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
@@ -71,11 +71,11 @@ public class CreateReportDTO {
         this.longitude = longitude;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

@@ -1,6 +1,7 @@
 package com.urbaniza.authapi.security;
 
-import java.util.Date;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,55 +13,45 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.ExpiredJwtException;
 
-/**
- * Esta classe utilitária fornece métodos para gerar, validar e analisar tokens JWT.
- */
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 @Component
 public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${urbaniza.app.jwtSecret}") // Injeta a chave secreta do application.properties
+    @Value("${urbaniza.app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${urbaniza.app.jwtExpirationMs}") // Injeta o tempo de expiração do token
+    @Value("${urbaniza.app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    /**
-     * Gera um token JWT para um utilizador autenticado.
-     *
-     * @param authentication O objeto Authentication do Spring Security contendo os detalhes do utilizador.
-     * @return O token JWT gerado.
-     */
-    public String generateJwtToken(Authentication authentication) {
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-
-        return Jwts.builder()
-                .setSubject((userPrincipal.getUsername())) // Define o nome de utilizador como o "subject" do token
-                .setIssuedAt(new Date()) // Define a data de emissão do token
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)) // Define a data de expiração
-                .signWith(SignatureAlgorithm.HS512, jwtSecret) // Assina o token com o algoritmo HS512 e a chave secreta
-                .compact(); // Converte o token para uma string compacta e segura para transmissão
-    }
-
-    /**
-     * Extrai o nome de utilizador (ou email) do token JWT.
-     *
-     * @param token O token JWT.
-     * @return O nome de utilizador extraído do token.
-     */
+    // Método para extrair o e-mail do token
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+        return getClaimFromToken(token, Claims::getSubject);
     }
 
-    /**
-     * Valida um token JWT.
-     *
-     * @param token O token JWT a ser validado.
-     * @return true se o token for válido, false caso contrário.
-     */
+    // Método para extrair a data de expiração do token
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    // Método genérico para extrair qualquer claim do token
+    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    // Método para extrair todos os claims do token
+    private Claims getAllClaimsFromToken(String token) {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+    }
+
+    // Método para validar o token
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
@@ -76,8 +67,22 @@ public class JwtUtils {
         } catch (IllegalArgumentException e) {
             logger.error("String JWT está vazia: {}", e.getMessage());
         }
-
         return false;
+    }
+
+    // Método para gerar o token JWT
+    public String generateJwtToken(Authentication authentication) {
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", userPrincipal.getUsername());
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userPrincipal.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
     }
 }
 

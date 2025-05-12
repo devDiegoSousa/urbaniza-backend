@@ -1,6 +1,5 @@
 package com.urbaniza.authapi.controller;
 
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.urbaniza.authapi.model.Token;
+import com.urbaniza.authapi.dto.auth.SigninRequestDTO;
+import com.urbaniza.authapi.dto.auth.SigninResponseDTO;
+import com.urbaniza.authapi.dto.auth.SignupRequestDTO;
+import com.urbaniza.authapi.model.User;
+import com.urbaniza.authapi.security.JwtUtils;
 import com.urbaniza.authapi.service.AuthService;
-import com.urbaniza.authapi.security.JwtUtils; // Importa JwtUtils
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestParam; //Importa oRequestParam
+import com.urbaniza.authapi.enums.UserRole; //Importa UserRole
 
 @RestController
 @RequestMapping("/auth")
@@ -27,28 +32,29 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    @PostMapping("/signup") // Rota responsável pelo registro do utilizador
-    public ResponseEntity<?> signup(@RequestBody Map<String, String> user) {
-        String email = user.get("email");
-        String password = user.get("password");
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
         try {
-            authService.signup(email, password);
+            authService.signup(signupRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
-    @PostMapping("/signin") // Rota responsável pelo login do utilizador
-    public ResponseEntity<Token> signin(@RequestBody Map<String, String> user) {
+    @PostMapping("/signin")
+    public ResponseEntity<SigninResponseDTO> signin(@Valid @RequestBody SigninRequestDTO signinRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.get("email"), user.get("password")));
+                new UsernamePasswordAuthenticationToken(signinRequest.getEmail(), signinRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
+        long expTime = jwtUtils.getExpirationDateFromToken(jwt).getTime();
 
-        Token token = new Token();
-        token.setToken(jwt);
-        return ResponseEntity.ok(token);
+        SigninResponseDTO response = new SigninResponseDTO();
+        response.setToken(jwt);
+        response.setExpTime(expTime);
+        return ResponseEntity.ok(response);
     }
 }
+

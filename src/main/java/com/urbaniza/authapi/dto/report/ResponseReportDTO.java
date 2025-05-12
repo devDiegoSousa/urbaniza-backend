@@ -17,13 +17,13 @@ public class ResponseReportDTO {
     private String photoUrl;
     private String photoPublicId;
     private ReportStatus status;
-    private Integer userId;
+    private Long userId;
     private boolean anonymous;
 
     public ResponseReportDTO() {
     }
 
-    public ResponseReportDTO(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, Integer userId, boolean anonymous) {
+    public ResponseReportDTO(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, Long userId, boolean anonymous) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -100,10 +100,10 @@ public class ResponseReportDTO {
         this.status = status;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
