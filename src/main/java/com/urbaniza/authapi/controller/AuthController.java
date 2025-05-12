@@ -7,11 +7,7 @@ import com.urbaniza.authapi.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.urbaniza.authapi.model.Token;
 import com.urbaniza.authapi.service.AuthService;
@@ -52,5 +48,14 @@ public class AuthController {
         Boolean isValid = authService.validade(token);
         return (isValid) ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        boolean isVerified = authService.verifyEmail(token);
+        if (isVerified) {
+            return ResponseEntity.ok("E-mail verificado com sucesso!");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token inválido ou expirado.");
     }
 }

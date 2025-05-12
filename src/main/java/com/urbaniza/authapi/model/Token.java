@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "token")
 public class Token {
@@ -17,21 +19,24 @@ public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private String token;
+
+    private String token; // armazena o UUID
+
     @ManyToOne @JsonIgnore
     private User user;
+
     private Long expTime;
+
 
     public Token() {
 
     }
 
-    public Token(Integer id, String token, User user, Long expTime) {
-        super();
-        this.id = id;
-        this.token = token;
+    // Novo construtor simplificado para gerar UUID e expiração
+    public Token(User user, long expirationTimeInMillis) {
+        this.token = UUID.randomUUID().toString();
         this.user = user;
-        this.expTime = expTime;
+        this.expTime = System.currentTimeMillis() + expirationTimeInMillis;
     }
 
     public Integer getId() {

@@ -17,34 +17,44 @@ public class AuthService {
     private UserRepository UserRepository;
     @Autowired
     private TokenRepository TokenRepository;
-    private Integer TOKEN_TTL = 30;
+    @Autowired
+    private EmailService emailService; // Adicione esta dependência!
+
+    // Tempo de expiração do token de verificação (24 horas em milissegundos)
+    private static final long EMAIL_VERIFICATION_EXPIRATION = 24 * 60 * 60 * 1000;
+
+    // Tempo de expiração do token de autenticação (30 segundos)
+    private static final Integer TOKEN_TTL = 30;
 
     public void signup(String email, String password) throws Exception {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(password);
-
         Optional<User> userFound = UserRepository.findByEmail(email);
         if (userFound.isPresent()) {
             throw new Exception("Email already exist");
         }
 
-        UserRepository.save(user);
-    }
-
-    public Token signin(String email, String password) {
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);
+        user.setVerified(false);
+        UserRepository.save(user);
 
+        Token veToken = new Token(
+                user,
+                EMAIL_VERIFICATION_EXPIRATION
+        );
+        TokenRepository.save(veToken);
+
+        emailService.sendVerificationEmail(email, veToken.getToken());
+    }
+
+    public Token signin(String email, String password) {
         Optional<User> userFound = UserRepository.findByEmail(email);
-        if (userFound.isPresent() && userFound.get().getPassword().equals(password)) {
-            Token token = new Token();
-            token.setUser(userFound.get());
-            token.setToken(UUID.randomUUID().toString()); // TODO criar logica tkn
-            token.setExpTime(Instant.now().plusSeconds(TOKEN_TTL).toEpochMilli());
-            token = TokenRepository.save(token);
-            return token;
+        if(userFound.isPresent() && userFound.get().getPassword().equals(password) && userFound.get().isVerified()) {
+            Token authToken = new Token();
+            authToken.setUser(userFound.get());
+            authToken.setToken(UUID.randomUUID().toString());
+            authToken.setExpTime(Instant.now().plusSeconds(TOKEN_TTL).toEpochMilli());
+            return TokenRepository.save(authToken);
         }
         return null;
     }
@@ -55,4 +65,18 @@ public class AuthService {
         return found.isPresent() && found.get().getExpTime() >Instant.now().toEpochMilli();
     }
 
+    public boolean verifyEmail(String token) {
+        Optional<Token> verificationToken = TokenRepository.findByToken(token);
+        if (verificationToken.isPresent() &&
+                verificationToken.get().getExpTime() > Instant.now().toEpochMilli()) {
+
+            User user = verificationToken.get().getUser();
+            user.setVerified(true);
+            UserRepository.save(user);
+
+            TokenRepository.delete(verificationToken.get()); // Remove o token após uso
+            return true;
+        }
+        return false;
+    }
 }

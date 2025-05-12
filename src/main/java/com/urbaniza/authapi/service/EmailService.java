@@ -14,14 +14,25 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String remetente;
 
-    public void enviarEmailTexto(String assunto, String destinatario,  String mensagem) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(remetente);
-        message.setTo(destinatario);
-        message.setSubject(assunto);
-        message.setText(mensagem);
-        javaMailSender.send(message);
+    @Value("${app.verification-url}")
+    private String verificationUrl;
 
+    public void sendVerificationEmail(String destinatario, String token) {
+        try {
+            String link = verificationUrl + "?token=" + token;
+            String mensagem = "Clique para verificar: " + link;
+
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setFrom(remetente);
+            email.setTo(destinatario);
+            email.setSubject("Verifique seu e-mail");
+            email.setText(mensagem);
+
+            javaMailSender.send(email);
+            System.out.println("E-mail enviado para: " + destinatario); // Log
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar e-mail: " + e.getMessage()); // Log de erro
+        }
     }
 
 }

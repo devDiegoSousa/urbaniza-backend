@@ -1,10 +1,6 @@
 package com.urbaniza.authapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -17,17 +13,29 @@ public class User {
     private String password;
     private String email;
 
+    @Column(nullable = false)
+    private boolean verified = false; // Inicializado como false
+
     //construtores
     public User() {
         // TODO Auto-generated constructor stub
     }
 
-    public User(Integer id, String username, String password, String email) {
+    public User(Integer id, String username, String password, String email, boolean verified) {
         super();
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.verified = verified;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
     // Gerar getter e setter
