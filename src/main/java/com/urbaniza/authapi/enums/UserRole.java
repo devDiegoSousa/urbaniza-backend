@@ -1,9 +1,9 @@
 package com.urbaniza.authapi.enums;
 
 public enum UserRole {
-    ADMIN("admin"),
+    DEPARTMENT("department"),
 
-    USER("user");
+    CITIZEN("citizen");
 
     private String role;
 
