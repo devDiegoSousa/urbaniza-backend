@@ -10,6 +10,8 @@ services:
       - 5433:5432
     volumes:
       - urb_postgres_data:/var/lib/postgresql/data
+    networks:
+      - local-network
 
   my-app:
     build: .
@@ -23,12 +25,30 @@ services:
       SPRING_DATASOURCE_PASSWORD: urbanizapassword
     ports:
       - 8282:8080
+    networks:
+      - local-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: urb-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@urbaniza.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - 8083:80
+    volumes:
+      - urb_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - dcs-postgres
+    networks:
+      - local-network
 
 volumes:
   urb_postgres_data:
   urb_pgadmin_data:
 
 networks:
-  default:
-    name: local-network
+  local-network:
     external: true
