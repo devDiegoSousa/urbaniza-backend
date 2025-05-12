@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.controller;
+package com.urbaniza.authapi.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,12 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.urbaniza.authapi.dto.auth.SigninRequestDTO;
 import com.urbaniza.authapi.dto.auth.SigninResponseDTO;
 import com.urbaniza.authapi.dto.auth.SignupRequestDTO;
-import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.security.JwtUtils;
 import com.urbaniza.authapi.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestParam; //Importa oRequestParam
-import com.urbaniza.authapi.enums.UserRole; //Importa UserRole
 
 @RestController
 @RequestMapping("/auth")

@@ -65,9 +65,9 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Libera explicitamente os endpoints públicos
-                        .requestMatchers("/auth/signin", "/auth/signup").permitAll()
-                        // Qualquer outro endpoint precisa de autenticação
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/citizen/**").hasRole("CITIZEN")
+                        .requestMatchers("/department/**").hasRole("DEPARTMENT")
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Para H2
