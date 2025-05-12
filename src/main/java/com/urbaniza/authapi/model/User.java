@@ -1,5 +1,6 @@
 package com.urbaniza.authapi.model;
 
+import com.urbaniza.authapi.enums.ReportStatus;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,6 +32,13 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.role == null) {
+            this.role = UserRole.CITIZEN;
+        }
+    }
 
     // Construtores
     public User() {}
