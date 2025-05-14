@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.dto.auth;
+package com.urbaniza.authapi.dto.auth.signup;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

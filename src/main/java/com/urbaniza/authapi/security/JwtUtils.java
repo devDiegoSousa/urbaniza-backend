@@ -3,20 +3,16 @@ package com.urbaniza.authapi.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
@@ -27,8 +23,11 @@ public class JwtUtils {
     @Value("${urbaniza.app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${urbaniza.app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    @Value("${urbaniza.app.jwtAccessExpirationMs}")
+    private int jwtAccessExpirationMs;
+
+    @Value("${urbaniza.app.jwtRefreshExpirationMs}")
+    private int jwtRefreshExpirationMs;
 
     // Método para extrair o e-mail do token
     public String getUserNameFromJwtToken(String token) {
@@ -40,7 +39,7 @@ public class JwtUtils {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
-    // Método genérico para extrair qualquer claim do token
+    // Método para extrair qualquer claim do token
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
@@ -58,8 +57,6 @@ public class JwtUtils {
             return true;
         } catch (SignatureException e) {
             logger.error("Assinatura JWT inválida: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            logger.error("Token JWT inválido: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
             logger.error("Token JWT expirado: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
@@ -70,19 +67,30 @@ public class JwtUtils {
         return false;
     }
 
-    // Método para gerar o token JWT
-    public String generateJwtToken(Authentication authentication) {
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("username", userPrincipal.getUsername());
+    // Método para gerar o token JWT de acesso
+    public String generateAccessToken(UserDetails userDetails) {
 
+        System.out.println("Novo token");
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtAccessExpirationMs)) // Expiração do token de acesso
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
-}
 
+    // Método para gerar o token JWT de refresh
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs)) // Expiração do token de refresh
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
+    // Método para verificar se o token está expirado
+    public boolean isTokenExpired(String token) {
+        return getExpirationDateFromToken(token).before(new Date());
+    }
+}

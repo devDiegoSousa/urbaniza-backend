@@ -38,8 +38,8 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         // Regista o erro
         logger.error("Resposta não autorizada: {}", authException.getMessage());
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE); // Usar MediaType
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());  // Usar HttpStatus
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getOutputStream().println("{ \"error\": \"" + authException.getMessage() + "\" }");
     }
 }

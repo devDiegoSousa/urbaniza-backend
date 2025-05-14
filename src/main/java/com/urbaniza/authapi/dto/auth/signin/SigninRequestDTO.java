@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.dto.auth;
+package com.urbaniza.authapi.dto.auth.signin;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,14 +1,17 @@
 package com.urbaniza.authapi.service;
 
 import java.util.Optional;
+
+import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.repository.TokenRepository;
 import com.urbaniza.authapi.repository.UserRepository;
-import com.urbaniza.authapi.dto.auth.SignupRequestDTO;
-import com.urbaniza.authapi.dto.auth.SigninRequestDTO;
+import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
+import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
 import com.urbaniza.authapi.security.JwtUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,16 +44,26 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public String signin(SigninRequestDTO signinRequestDTO) {
+    public SigninResponseDTO signin(SigninRequestDTO signinRequestDTO) {
         Optional<User> userFound = userRepository.findByEmail(signinRequestDTO.getEmail());
         if (userFound.isPresent() && passwordEncoder.matches(signinRequestDTO.getPassword(), userFound.get().getPassword())) {
-            // Criando o token de autenticação com email e senha (a senha será 'null' após a verificação)
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    signinRequestDTO.getEmail(), signinRequestDTO.getPassword(), userFound.get().getAuthorities());
+                    signinRequestDTO.getEmail(), null, userFound.get().getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            return jwtUtils.generateJwtToken(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            String accessToken = jwtUtils.generateAccessToken(userDetails);
+            String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+            long expTime = jwtUtils.getExpirationDateFromToken(accessToken).getTime();
+
+            SigninResponseDTO response = new SigninResponseDTO();
+            response.setAccessToken(accessToken);
+            response.setRefreshToken(refreshToken);
+            response.setExpTime(expTime);
+
+            return response;
         }
         return null;
     }
