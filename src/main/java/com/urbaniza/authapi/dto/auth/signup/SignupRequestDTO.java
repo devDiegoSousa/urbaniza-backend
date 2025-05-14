@@ -23,18 +23,14 @@ public class SignupRequestDTO {
     @Size(max = 50, message = "Sobrenome deve ter no máximo 50 caracteres")
     private String lastName;
 
-    @NotBlank(message = "Role é obrigatória")
-    private String role;
-
     public SignupRequestDTO() {
     }
 
-    public SignupRequestDTO(String email, String password, String firstName, String lastName, String role) {
+    public SignupRequestDTO(String email, String password, String firstName, String lastName) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.role = role;
     }
 
     public String getEmail() {return email;}
@@ -49,6 +45,4 @@ public class SignupRequestDTO {
     public String getLastName() {return lastName;}
     public void setLastName(String lastName) {this.lastName = lastName;}
 
-    public String getRole() {return role;}
-    public void setRole(String role) {this.role = role;}
 }

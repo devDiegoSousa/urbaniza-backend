@@ -29,7 +29,7 @@ public class User implements UserDetails {
     @Column(name = "last_name", nullable = false)
     private String lastName;    // Mantendo, caso precise usar depois
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
