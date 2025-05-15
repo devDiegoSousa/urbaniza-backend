@@ -38,7 +38,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-    System.out.println("Path atual: " + request.getRequestURI());
+
     return PUBLIC_URLS.stream().anyMatch(path::startsWith);
   }
 
