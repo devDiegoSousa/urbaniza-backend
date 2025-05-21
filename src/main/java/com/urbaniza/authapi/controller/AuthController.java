@@ -26,7 +26,6 @@ public class AuthController {
 
         try {
             authService.signup(signupRequestDTO.getEmail(), signupRequestDTO.getPassword());
-//            emailService.enviarEmailTexto("email", signupRequestDTO.getEmail(), "oi");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

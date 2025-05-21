@@ -42,9 +42,25 @@ public class AuthService {
                 user,
                 EMAIL_VERIFICATION_EXPIRATION
         );
+
         TokenRepository.save(veToken);
 
         emailService.sendVerificationEmail(email, veToken.getToken());
+    }
+
+    public boolean verifyEmail(String token) {
+        Optional<Token> verificationToken = TokenRepository.findByToken(token);
+        if (verificationToken.isPresent() &&
+                verificationToken.get().getExpTime() > Instant.now().toEpochMilli()) {
+
+            User user = verificationToken.get().getUser();
+            user.setVerified(true);
+            UserRepository.save(user);
+
+            TokenRepository.delete(verificationToken.get()); // Remove o token após uso
+            return true;
+        }
+        return false;
     }
 
     public Token signin(String email, String password) {
@@ -65,18 +81,4 @@ public class AuthService {
         return found.isPresent() && found.get().getExpTime() >Instant.now().toEpochMilli();
     }
 
-    public boolean verifyEmail(String token) {
-        Optional<Token> verificationToken = TokenRepository.findByToken(token);
-        if (verificationToken.isPresent() &&
-                verificationToken.get().getExpTime() > Instant.now().toEpochMilli()) {
-
-            User user = verificationToken.get().getUser();
-            user.setVerified(true);
-            UserRepository.save(user);
-
-            TokenRepository.delete(verificationToken.get()); // Remove o token após uso
-            return true;
-        }
-        return false;
-    }
 }
