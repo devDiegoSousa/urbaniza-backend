@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.urbaniza</groupId>
 	<artifactId>authapi</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.3.0-SNAPSHOT</version>
 	<name>authapi</name>
 	<description>Java project for the Cross-platform Software Development course</description>
 	<url/>
@@ -119,6 +119,20 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.19.7</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.19.7</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
