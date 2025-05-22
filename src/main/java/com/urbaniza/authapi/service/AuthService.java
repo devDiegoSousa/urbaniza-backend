@@ -1,6 +1,7 @@
 package com.urbaniza.authapi.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private EmailService emailService;
 
 
     public void signup(SignupRequestDTO signupRequestDTO) throws Exception {
@@ -41,7 +44,13 @@ public class AuthService {
 
         if (userFound.isPresent()) {throw new Exception("Email já existe");}
 
-        userRepository.save(user);
+        // Gera o token e atualiza o usuário
+        String confirmationToken = UUID.randomUUID().toString();
+        user.setConfirmationToken(confirmationToken);
+        userRepository.save(user); // Salva no banco
+
+        // Envia o email (chama o EmailService)
+        emailService.sendConfirmationEmail(user.getEmail(), confirmationToken);
     }
 
     public SigninResponseDTO signin(SigninRequestDTO signinRequestDTO) {

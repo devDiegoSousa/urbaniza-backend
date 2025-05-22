@@ -8,4 +8,5 @@ import com.urbaniza.authapi.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> { // Estende JpaRepository e usa Long
     Optional<User> findByEmail(String email);
+    Optional<User> findByConfirmationToken(String token);
 }

@@ -13,20 +13,20 @@ services:
     networks:
       - local-network
 
-  my-app:
-    build: .
-    container_name: urbanizaApplication
-    restart: always
-    depends_on:
-      - dcs-postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://dcs-postgres:5432/postgres
-      SPRING_DATASOURCE_USERNAME: urbanizapostgres
-      SPRING_DATASOURCE_PASSWORD: urbanizapassword
-    ports:
-      - 8282:8080
-    networks:
-      - local-network
+#  my-app:
+#    build: .
+#    container_name: urbanizaApplication
+#    restart: always
+#    depends_on:
+#      - dcs-postgres
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://dcs-postgres:5432/postgres
+#      SPRING_DATASOURCE_USERNAME: urbanizapostgres
+#      SPRING_DATASOURCE_PASSWORD: urbanizapassword
+#    ports:
+#      - 8282:8080
+#    networks:
+#      - local-network
 
   pgadmin:
     image: dpage/pgadmin4:latest

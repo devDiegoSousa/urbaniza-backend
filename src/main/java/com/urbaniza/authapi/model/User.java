@@ -29,6 +29,28 @@ public class User implements UserDetails {
     @Column(name = "last_name", nullable = false)
     private String lastName;    // Mantendo, caso precise usar depois
 
+    @Column(name = "confirmation_token", unique = true)
+    private String confirmationToken;
+
+    @Column(nullable = false)
+    private boolean emailConfirmed = false; // Default false
+
+    public String getConfirmationToken() {
+        return confirmationToken;
+    }
+
+    public void setConfirmationToken(String confirmationToken) {
+        this.confirmationToken = confirmationToken;
+    }
+
+    public boolean isEmailConfirmed() {
+        return emailConfirmed;
+    }
+
+    public void setEmailConfirmed(boolean emailConfirmed) {
+        this.emailConfirmed = emailConfirmed;
+    }
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
