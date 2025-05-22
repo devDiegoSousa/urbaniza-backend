@@ -30,9 +30,6 @@ public class CloudinaryService {
                 "cloud_name", cloudName,
                 "api_key", apiKey,
                 "api_secret", apiSecret));
-        System.out.println("Cloudinary Cloud Name (PostConstruct): " + cloudName);
-        System.out.println("Cloudinary API Key (PostConstruct): " + apiKey);
-        System.out.println("Cloudinary API Secret (PostConstruct): " + apiSecret);
     }
 
     public Map uploadImage(MultipartFile file) throws IOException {
