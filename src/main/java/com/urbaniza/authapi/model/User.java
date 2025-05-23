@@ -24,10 +24,10 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "first_name", nullable = false)
-    private String firstName;  // Mantendo, caso precise usar depois
+    private String firstName;
 
     @Column(name = "last_name", nullable = false)
-    private String lastName;    // Mantendo, caso precise usar depois
+    private String lastName;
 
     @Column(name = "confirmation_token", unique = true)
     private String confirmationToken;

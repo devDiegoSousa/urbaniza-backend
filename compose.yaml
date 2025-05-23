@@ -1,11 +1,12 @@
 services:
-  dcs-postgres:
+  urbdb:
     image: postgres:17.4-alpine
-    container_name: urb-postgres
+    container_name: urbdb
     restart: always
     environment:
       POSTGRES_PASSWORD: urbanizapassword
       POSTGRES_USER: urbanizapostgres
+      POSTGRES_DB: urb-db
     ports:
       - 5433:5432
     volumes:
@@ -13,20 +14,26 @@ services:
     networks:
       - local-network
 
-#  my-app:
-#    build: .
-#    container_name: urbanizaApplication
-#    restart: always
-#    depends_on:
-#      - dcs-postgres
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://dcs-postgres:5432/postgres
-#      SPRING_DATASOURCE_USERNAME: urbanizapostgres
-#      SPRING_DATASOURCE_PASSWORD: urbanizapassword
-#    ports:
-#      - 8282:8080
-#    networks:
-#      - local-network
+  my-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: urbaniza
+    container_name: urbaniza
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U urbanizapostgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://urbdb:5432/urb-db
+      SPRING_DATASOURCE_USERNAME: urbanizapostgres
+      SPRING_DATASOURCE_PASSWORD: urbanizapassword
+    ports:
+      - 8282:8081
+    networks:
+      - local-network
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -41,7 +48,7 @@ services:
     volumes:
       - urb_pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - dcs-postgres
+      - urbdb
     networks:
       - local-network
 
