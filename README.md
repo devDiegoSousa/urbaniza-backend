@@ -81,7 +81,7 @@ A API REST da Urbaniza expõe endpoints para registro de denúncias, gerenciamen
 #### POST `/auth/signup`
 Cria o registro de um novo usuário no banco de dados
 
-##### Request Body:
+##### Request Body example:
 ```
 {
     "email": "teste@urbaniza.com",
@@ -91,14 +91,14 @@ Cria o registro de um novo usuário no banco de dados
     "role": "DEPARTMENT"(DEPARTMENT ou CITIZEN)
 }
 ```
-##### Response Body:
+##### Response Body example:
 
     Usuário registrado com sucesso.
 
 #### POST `/auth/signin`
 Autentica um usuário e retorna o token JWT.
 
-##### Request Body:
+##### Request Body example:
 ```    
 {
   "email": "usuario@email.com",
@@ -106,7 +106,7 @@ Autentica um usuário e retorna o token JWT.
 }
 ```
 
-##### Response Body:
+##### Response Body example:
 ```
 {
     "accessToken": "eyJh...",
@@ -118,7 +118,7 @@ Autentica um usuário e retorna o token JWT.
 #### POST `/auth/refresh-token`
 Utiliza o refreshToken para criar um novo accessToken
 
-##### Request Body
+##### Request Body example
 
 ```
 {
@@ -127,7 +127,7 @@ Utiliza o refreshToken para criar um novo accessToken
 ```
 
 ## 🧪 Testando a API
-Você pode usar ferramentas como Postman ou Insomnia para interagir com a API, entretanto,você pode realizar solicitações diretamente do [front-end](https://github.com/devDiegoSousa/urbaniza-frontend) da aplicação.
+Você pode usar ferramentas como Postman ou Insomnia para interagir com a API, entretanto, pode-se realizar solicitações diretamente do [front-end](https://github.com/devDiegoSousa/urbaniza-frontend) da aplicação.
 
 ## 🧹 Encerrando os containers
 Para parar a aplicação e remover os containers:
