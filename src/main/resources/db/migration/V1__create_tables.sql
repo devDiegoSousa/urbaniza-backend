@@ -1,3 +1,12 @@
+-- Criação do ENUM para user_role
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE user_role AS ENUM ('citizen', 'admin', 'manager');
+    END IF;
+END
+$$;
+
 -- Usuário
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -5,7 +14,42 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    role VARCHAR(50) NOT NULL
+    role user_role NOT NULL
+);
+
+-- Cidade
+CREATE TABLE IF NOT EXISTS cities (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    uf VARCHAR(2) NOT NULL
+);
+
+-- Região
+CREATE TABLE IF NOT EXISTS regions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE
+);
+
+-- Departamento
+CREATE TABLE IF NOT EXISTS departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50),
+    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE
+);
+
+-- Segmento
+CREATE TABLE IF NOT EXISTS segments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    department_id INTEGER NOT NULL REFERENCES departments(id) ON DELETE CASCADE
+);
+
+-- Tipos de status
+CREATE TABLE IF NOT EXISTS status_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL
 );
 
 -- Denúncia
@@ -33,43 +77,3 @@ CREATE TABLE IF NOT EXISTS status_history (
     previous_status INTEGER NOT NULL REFERENCES status_types(id) ON DELETE CASCADE,
     modified_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
-
--- Tipos de status
-CREATE TABLE IF NOT EXISTS status_types (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(20) NOT NULL
-);
-
--- Segmento
-CREATE TABLE IF NOT EXISTS segments (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    department_id INTEGER NOT NULL REFERENCES departments(id) ON DELETE CASCADE
-);
-
--- Departamento
-CREATE TABLE IF NOT EXISTS departments (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(50),
-    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE
-);
-
--- Cidade
-CREATE TABLE IF NOT EXISTS cities (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    uf VARCHAR(2) NOT NULL
-);
-
--- Região
-CREATE TABLE IF NOT EXISTS regions (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE
-);
-
-
-
-
-

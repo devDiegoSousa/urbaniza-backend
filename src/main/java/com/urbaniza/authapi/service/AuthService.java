@@ -3,6 +3,7 @@ package com.urbaniza.authapi.service;
 import java.util.Optional;
 
 import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
+import com.urbaniza.authapi.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,15 +32,16 @@ public class AuthService {
 
 
     public void signup(SignupRequestDTO signupRequestDTO) throws Exception {
+        Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
+        if (userFound.isPresent()) {throw new Exception("Email já existe");}
+
         User user = new User();
         user.setEmail(signupRequestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
         user.setFirstName(signupRequestDTO.getFirstName());
         user.setLastName(signupRequestDTO.getLastName());
 
-        Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
-
-        if (userFound.isPresent()) {throw new Exception("Email já existe");}
+        user.setRole(UserRole.CITIZEN);
 
         userRepository.save(user);
     }

@@ -1,20 +1,19 @@
 package com.urbaniza.authapi.model;
 
-import com.urbaniza.authapi.enums.ReportStatus;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
-import com.urbaniza.authapi.enums.UserRole; //Importa o Enum
+import com.urbaniza.authapi.enums.UserRole;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Use GenerationType.IDENTITY para PostgreSQL
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -40,9 +39,8 @@ public class User implements UserDetails {
         }
     }
 
-    // Construtores
+    // Constructors to JPA
     public User() {}
-
     public User(Long id, String email, String password,String firstName, String lastName, UserRole role) {
         this.id = id;
         this.email = email;

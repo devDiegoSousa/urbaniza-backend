@@ -16,7 +16,6 @@ public class AuthapiApplication {
 		SpringApplication.run(AuthapiApplication.class, args);
 	}
 
-
 	@Bean(name = "multipartResolver")
 	public StandardServletMultipartResolver multipartResolver() {
 		return new StandardServletMultipartResolver();

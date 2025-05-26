@@ -27,7 +27,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Autowired
@@ -65,7 +65,11 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup", "/auth/signin", "/auth/refresh-token").permitAll()
+                        .requestMatchers("/auth/signup",
+                            "/auth/signin",
+                            "/auth/refresh-token",
+                            "/admin/cities/uf/{uf}",
+                            "/admin/cities/uf/{uf}/city/{name}").permitAll()
                         .requestMatchers("/citizen/**").hasRole("CITIZEN")
                         .requestMatchers("/department/**").hasRole("DEPARTMENT")
                         .anyRequest().authenticated()

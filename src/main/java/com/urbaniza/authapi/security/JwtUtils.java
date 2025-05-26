@@ -22,35 +22,37 @@ public class JwtUtils {
 
     @Value("${urbaniza.app.jwtSecret}")
     private String jwtSecret;
-
     @Value("${urbaniza.app.jwtAccessExpirationMs}")
     private int jwtAccessExpirationMs;
-
     @Value("${urbaniza.app.jwtRefreshExpirationMs}")
     private int jwtRefreshExpirationMs;
 
-    // Método para extrair o e-mail do token
+    // Extrai o e-mail do token
     public String getUserNameFromJwtToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    // Método para extrair a data de expiração do token
+    // Extrai a data de expiração do token
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
-    // Método para extrair qualquer claim do token
+    public String getRoleFromJwtToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get("role", String.class);
+    }
+
+    // Extrai qualquer claim do token
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
-    // Método para extrair todos os claims do token
+    // Extrai todos os claims do token
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
     }
 
-    // Método para validar o token
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
@@ -67,29 +69,32 @@ public class JwtUtils {
         return false;
     }
 
-    // Método para gerar o token JWT de acesso
     public String generateAccessToken(UserDetails userDetails) {
 
-        System.out.println("Novo token");
+        String role = userDetails.getAuthorities().stream()
+            .findFirst()
+            .map(auth -> auth.getAuthority())
+            .orElse("ROLE_CITIZEN"); // valor padrão de segurança
+
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtAccessExpirationMs)) // Expiração do token de acesso
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
+            .setSubject(userDetails.getUsername())
+            .claim("role", role)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + jwtAccessExpirationMs))
+            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .compact();
     }
 
-    // Método para gerar o token JWT de refresh
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs)) // Expiração do token de refresh
+                .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 
-    // Método para verificar se o token está expirado
+    // Verificar se o token está expirado
     public boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
     }
