@@ -98,7 +98,5 @@ public class ReportService {
         return responseDTO;
     }
 
-
-
     // Outros métodos do serviço (atualização, exclusão, etc.) seriam implementados aqui
 }
