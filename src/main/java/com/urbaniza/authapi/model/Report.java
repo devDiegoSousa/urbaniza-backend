@@ -1,14 +1,10 @@
-// Model: com.urbaniza.authapi.model.Report.java
 package com.urbaniza.authapi.model;
 
-import com.urbaniza.authapi.enums.ReportStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.CreationTimestamp;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,175 +12,181 @@ import java.util.Objects;
 public class Report {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @NotBlank
-    @Size(max = 255, message = "Title cannot exceed 255 characters")
+    @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @NotBlank(message = "Description is required")
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @NotNull(message = "Latitude is required")
-    @Column(nullable = false)
-    private Double latitude;
+    @Column(name = "latitude", nullable = false, precision = 9, scale = 6)
+    private BigDecimal latitude;
 
-    @NotNull(message = "Longitude is required")
-    @Column(nullable = false)
-    private Double longitude;
+    @Column(name = "longitude", nullable = false, precision = 9, scale = 6)
+    private BigDecimal longitude;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime creationDateTime;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column
+    @Column(name = "photo_url", length = 255)
     private String photoUrl;
 
-    @Column(length = 255)
+    @Column(name = "photo_public_id", length = 255)
     private String photoPublicId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReportStatus status;
+    @Column(name = "anonymous", nullable = false)
+    private boolean anonymous;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "User ID is required")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_report_user"))
     private User user;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean anonymous;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "status_id", nullable = false, foreignKey = @ForeignKey(name = "fk_report_status"))
+    private StatusType status;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "segment_id", nullable = false, foreignKey = @ForeignKey(name = "fk_report_segment"))
+    private Segment segment;
+
+    @OneToMany(
+        mappedBy = "report",
+        cascade = CascadeType.ALL, // Se a denúncia some, seu histórico some.
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    private List<StatusHistory> statusHistories = new ArrayList<>();
+
+
+    protected Report() {}
+
+    public Report(String title, String description, BigDecimal latitude, BigDecimal longitude,
+                  boolean anonymous, User user, StatusType status, Segment segment) {
+
+        Objects.requireNonNull(title, "O título não pode ser nulo.");
+        Objects.requireNonNull(description, "A descrição não pode ser nula.");
+        Objects.requireNonNull(latitude, "A latitude não pode ser nula.");
+        Objects.requireNonNull(longitude, "A longitude não pode ser nula.");
+        Objects.requireNonNull(user, "O usuário não pode ser nulo.");
+        Objects.requireNonNull(status, "O status não pode ser nulo.");
+        Objects.requireNonNull(segment, "O segmento não pode ser nulo.");
+
+        this.title = title;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.anonymous = anonymous;
+        this.user = user;
+        this.status = status;
+        this.segment = segment;
+        // Data de criação definida pelo @PrePersist
+    }
 
     @PrePersist
     protected void onCreate() {
-        if (this.status == null) {
-            this.status = ReportStatus.NEW;
-        }
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Report() {
-    }
+    // --- Getters & Setters---
 
-    public Report(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, User user, boolean anonymous) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.creationDateTime = creationDateTime;
-        this.photoUrl = photoUrl;
-        this.photoPublicId = photoPublicId;
-        this.status = status;
-        this.user = user;
-        this.anonymous = anonymous;
-    }
+    public Long getId() {return id;}
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() {return title;}
     public void setTitle(String title) {
+        Objects.requireNonNull(title, "O título não pode ser nulo.");
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() {return description;}
     public void setDescription(String description) {
+        Objects.requireNonNull(description, "A descrição não pode ser nula.");
         this.description = description;
     }
 
-    public Double getLatitude() {
-        return latitude;
-    }
-    public void setLatitude(Double latitude) {
+    public BigDecimal getLatitude() {return latitude;}
+    public void setLatitude(BigDecimal latitude) {
+        Objects.requireNonNull(latitude, "A latitude não pode ser nula.");
         this.latitude = latitude;
     }
 
-    public Double getLongitude() {
-        return longitude;
-    }
-    public void setLongitude(Double longitude) {
+    public BigDecimal getLongitude() {return longitude;}
+    public void setLongitude(BigDecimal longitude) {
+        Objects.requireNonNull(longitude, "A longitude não pode ser nula.");
         this.longitude = longitude;
     }
 
-    public LocalDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-    public void setCreationDateTime(LocalDateTime creationDateTime) {
-        this.creationDateTime = creationDateTime;
-    }
+    public LocalDateTime getCreatedAt() {return createdAt;}
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
+    public String getPhotoUrl() {return photoUrl;}
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
     }
 
-    public String getPhotoPublicId() {
-        return photoPublicId;
-    }
+    public String getPhotoPublicId() {return photoPublicId;}
     public void setPhotoPublicId(String photoPublicId) {
         this.photoPublicId = photoPublicId;
     }
 
-    public ReportStatus getStatus() {
-        return status;
-    }
-    public void setStatus(ReportStatus status) {
-        this.status = status;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public boolean isAnonymous() {
-        return anonymous;
-    }
+    public boolean isAnonymous() {return anonymous;}
     public void setAnonymous(boolean anonymous) {
         this.anonymous = anonymous;
     }
+
+    public User getUser() {return user;}
+
+    public StatusType getStatus() {return status;}
+    public void setStatus(StatusType status) {
+        Objects.requireNonNull(status, "O status não pode ser nulo.");
+        this.status = status;
+    }
+
+    public Segment getSegment() {return segment;}
+
+    public void setSegment(Segment segment) {
+        Objects.requireNonNull(segment, "O status não pode ser nulo.");
+        this.segment = segment;
+    }
+
+    public List<StatusHistory> getStatusHistories() {return statusHistories;}
+
+    // --- Helper methods---
+
+    public void addStatusHistory(StatusHistory historyEntry) {
+        if (this.statusHistories == null) {
+            this.statusHistories = new ArrayList<>();
+        }
+        this.statusHistories.add(historyEntry);
+        historyEntry.setReport(this); // Assume que StatusHistory tem setReport
+    }
+
+    public void removeStatusHistory(StatusHistory historyEntry) {
+        if (this.statusHistories != null) {
+            this.statusHistories.remove(historyEntry);
+            historyEntry.setReport(null); // Assume que StatusHistory tem setReport
+        }
+    }
+
+    // --- equals(), hashCode() e toString() ---
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Report report = (Report) o;
-        return anonymous == report.anonymous && Objects.equals(id, report.id) && Objects.equals(title, report.title) && Objects.equals(description, report.description) && Objects.equals(latitude, report.latitude) && Objects.equals(longitude, report.longitude) && Objects.equals(creationDateTime, report.creationDateTime) && Objects.equals(photoUrl, report.photoUrl) && Objects.equals(photoPublicId, report.photoPublicId) && status == report.status && Objects.equals(user, report.user);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, title, description, latitude, longitude, creationDateTime, photoUrl, photoPublicId, status, user, anonymous);
+        return id != null && id.equals(report.id);
     }
 
     @Override
     public String toString() {
         return "Report{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", creationDateTime=" + creationDateTime +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", photoPublicId='" + photoPublicId + '\'' +
-                ", status=" + status +
-                ", user=" + (anonymous ? "Anonymous" : user.getId()) +
-                ", anonymous=" + anonymous +
-                '}';
+            "id=" + id +
+            ", title='" + title + '\'' +
+            ", createdAt=" + createdAt +
+            ", statusId=" + (status != null ? status.getId() : "null") +
+            ", userId=" + (user != null ? user.getId() : "null") +
+            '}';
     }
 }
