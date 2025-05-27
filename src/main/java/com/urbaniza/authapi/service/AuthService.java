@@ -13,7 +13,7 @@ import com.urbaniza.authapi.repository.TokenRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
-import com.urbaniza.authapi.security.JwtUtils;
+import com.urbaniza.authapi.util.JwtUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

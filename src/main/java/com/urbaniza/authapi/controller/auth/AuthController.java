@@ -7,7 +7,7 @@ import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
 import com.urbaniza.authapi.dto.auth.refresh.RefreshTokenRequestDTO;
 import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.repository.UserRepository;
-import com.urbaniza.authapi.security.JwtUtils;
+import com.urbaniza.authapi.util.JwtUtils;
 import com.urbaniza.authapi.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
