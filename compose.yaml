@@ -21,6 +21,8 @@ services:
     image: urbaniza
     container_name: urbaniza
     restart: always
+    depends_on:
+      - urbdb
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U urbanizapostgres" ]
       interval: 5s

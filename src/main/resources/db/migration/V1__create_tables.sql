@@ -1,4 +1,4 @@
--- Criação do ENUM para user_role
+-- Criação do ENUM para user_role, SE NÃO EXISTIR
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
@@ -6,6 +6,20 @@ BEGIN
     END IF;
 END
 $$;
+
+-- Cidade
+CREATE TABLE IF NOT EXISTS cities (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    uf VARCHAR(2) NOT NULL,
+    UNIQUE(name, uf)
+);
+
+-- Tipos de status
+CREATE TABLE IF NOT EXISTS status_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(20) UNIQUE NOT NULL
+);
 
 -- Usuário
 CREATE TABLE IF NOT EXISTS users (
@@ -17,23 +31,6 @@ CREATE TABLE IF NOT EXISTS users (
     role user_role NOT NULL
 );
 
--- Cidade
-CREATE TABLE IF NOT EXISTS cities (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    uf VARCHAR(2) NOT NULL,
-    UNIQUE(name, uf)
-);
-
--- Região
-CREATE TABLE IF NOT EXISTS regions (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
-    UNIQUE(name, city_id)
-);
-CREATE INDEX IF NOT EXISTS idx_regions_city_id ON regions(city_id);
-
 -- Departamento
 CREATE TABLE IF NOT EXISTS departments (
     id SERIAL PRIMARY KEY,
@@ -44,6 +41,15 @@ CREATE TABLE IF NOT EXISTS departments (
 );
 CREATE INDEX IF NOT EXISTS idx_departments_city_id ON departments(city_id);
 
+-- Região
+CREATE TABLE IF NOT EXISTS regions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    city_id INTEGER NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
+    UNIQUE(name, city_id)
+);
+CREATE INDEX IF NOT EXISTS idx_regions_city_id ON regions(city_id);
+
 -- Segmento
 CREATE TABLE IF NOT EXISTS segments (
     id SERIAL PRIMARY KEY,
@@ -52,11 +58,6 @@ CREATE TABLE IF NOT EXISTS segments (
     UNIQUE(name, department_id)
 );
 CREATE INDEX IF NOT EXISTS idx_segments_department_id ON segments(department_id);
-
-CREATE TABLE IF NOT EXISTS status_types (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(20) UNIQUE NOT NULL
-);
 
 -- Denúncia
 CREATE TABLE IF NOT EXISTS reports (
