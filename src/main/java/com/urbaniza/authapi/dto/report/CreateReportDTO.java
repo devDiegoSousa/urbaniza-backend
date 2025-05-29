@@ -1,48 +1,63 @@
 // DTO: com.urbaniza.authapi.dto.report.CreateReportDTO.java
 package com.urbaniza.authapi.dto.report;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class CreateReportDTO {
 
-    @NotBlank
+    @NotBlank(message = "Title cannot be blank.")
     @Size(max = 255, message = "Title cannot exceed 255 characters")
     private String title;
 
+    @NotBlank(message = "Description cannot be blank.")
     @NotBlank(message = "Description is required")
     private String description;
 
     @NotNull(message = "Latitude is required")
-    private Double latitude;
+    @DecimalMin(value = "-90.0", message = "invalid latitude .")
+    @DecimalMax(value = "90.0", message = "invalid latitude .")
+    private BigDecimal latitude;
 
     @NotNull(message = "Longitude is required")
-    private Double longitude;
+    @DecimalMin(value = "-180.0", message = "invalid longitude .")
+    @DecimalMax(value = "90.0", message = "invalid latitude .")
+    private BigDecimal longitude;
+
+    @NotNull(message = "segment is required.")
+    private Long segmentId;
 
     @NotNull(message = "User ID is required")
     private Long userId;
 
+    @NotNull(message = "Information about anonymity is required (true or false).")
     private boolean anonymous;
 
-    public CreateReportDTO() {
-    }
+    @Size(max = 255, message = "Photo URL cannot exceed 255 characters")
+    private String photoUrl;
 
-    public CreateReportDTO(String title, String description, Double latitude, Double longitude, Long userId, boolean anonymous) {
+    @Size(max = 255, message = "Public photo id cannot exceed 255 characters")
+    private String photoPublicId;
+
+    // Constructors
+    public CreateReportDTO() {}
+    public ReportCreateRequestDTO(String title, String description, BigDecimal latitude, BigDecimal longitude, Long segmentId, Boolean anonymous, String photoUrl, String photoPublicId) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.userId = userId;
+        this.segmentId = segmentId;
         this.anonymous = anonymous;
+        this.photoUrl = photoUrl;
+        this.photoPublicId = photoPublicId;
     }
 
+    // Getters & Setters
     public String getTitle() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title = title;
     }
@@ -50,79 +65,56 @@ public class CreateReportDTO {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Double getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
-
-    public void setLatitude(Double latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public Double getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
-
-    public void setLongitude(Double longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
+
+    public Long getSegmentId() {return segmentId;}
+    public void setSegmentId(Long segmentId) {this.segmentId = segmentId;}
 
     public Long getUserId() {
         return userId;
     }
-
     public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public boolean isAnonymous() {
-        return anonymous;
-    }
+    public Boolean isAnonymous() {return anonymous;}
+    public void setAnonymous(Boolean anonymous) {this.anonymous = anonymous;}
 
-    public void setAnonymous(boolean anonymous) {
-        this.anonymous = anonymous;
-    }
+    public String getPhotoUrl() {return photoUrl;}
+    public void setPhotoUrl(String photoUrl) {this.photoUrl = photoUrl;}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CreateReportDTO that = (CreateReportDTO) o;
-        return anonymous == that.anonymous && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(latitude, that.latitude) && Objects.equals(longitude, that.longitude) && Objects.equals(userId, that.userId);
-    }
+    public String getPhotoPublicId() {return photoPublicId;}
+    public void setPhotoPublicId(String photoPublicId) {this.photoPublicId = photoPublicId;}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description, latitude, longitude, userId, anonymous);
-    }
-
+    // toString
     @Override
     public String toString() {
-        if (!anonymous){
-            return "CreateReportDTO{" +
-                    "title='" + title + '\'' +
-                    ", description='" + description + '\'' +
-                    ", latitude=" + latitude +
-                    ", longitude=" + longitude +
-                    ", userId=" + userId +
-                    ", anonymous=" + anonymous +
-                    '}';
-
-            // TODO Garantir que os dados do usuário anónimo não sejam vinculados
-        } else{
-            return "CreateReportDTO{" +
-                    "title='" + title + '\'' +
-                    ", description='" + description + '\'' +
-                    ", latitude=" + latitude +
-                    ", longitude=" + longitude +
-                    ", userId=" + userId +
-                    ", anonymous=" + anonymous +
-                    '}';
-        }
-
+        return "ReportCreateRequestDTO{" +
+            "title='" + title + '\'' +
+            ", description='" + (description != null ? description.substring(0, Math.min(description.length(), 30)) + "..." : "null") + '\'' +
+            ", latitude=" + latitude +
+            ", longitude=" + longitude +
+            ", segmentId=" + segmentId +
+            ", anonymous=" + anonymous +
+            ", photoUrl='" + photoUrl + '\'' +
+            ", photoPublicId='" + photoPublicId + '\'' +
+            '}';
     }
+}
 }
