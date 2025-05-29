@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.dto.report; // Ajuste o pacote
+package com.urbaniza.authapi.dto.report;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -8,8 +8,8 @@ public class UpdateReportStatusRequestDTO {
     private Long newStatusId;
 
     // Constructors
-    public ReportStatusUpdateRequestDTO() {}
-    public ReportStatusUpdateRequestDTO(Long newStatusId) {
+    public UpdateReportStatusRequestDTO() {}
+    public UpdateReportStatusRequestDTO(Long newStatusId) {
         this.newStatusId = newStatusId;
     }
 

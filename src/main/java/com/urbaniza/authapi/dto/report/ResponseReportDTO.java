@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.dto.report; // Ajuste o pacote
+package com.urbaniza.authapi.dto.report;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigDecimal;
