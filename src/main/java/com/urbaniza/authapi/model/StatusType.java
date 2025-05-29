@@ -9,38 +9,41 @@ public class StatusType {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
   private Long id;
 
-  @Column(name = "name", nullable = false, length = 20, unique = true)
+  @Column(name = "name", nullable = false, unique = true, length = 20)
   private String name;
 
-  protected StatusType(){};
+  // Constructors
+  public StatusType() {}
+
   public StatusType(String name) {
-    validateName(name);
-    this.name = name.trim();
-  }
+    this.name = name;}
 
-  // --- Getters & Setters---
-
+  // Getters & Setters
   public Long getId() {return id;}
+  public void setId(Long id) {this.id = id;}
 
   public String getName() {return name;}
-  public void setName(String name) {
-    validateName(name);
-    this.name = name.trim();
+  public void setName(String name) {this.name = name;}
+
+  // equals, hashCode, toString
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    StatusType that = (StatusType) o;
+    return Objects.equals(id, that.id);
   }
 
-  // --- Helper methods---
+  @Override
+  public int hashCode() {return Objects.hash(id);}
 
-  private void validateName(String name) {
-    Objects.requireNonNull(name, "O nome do tipo de status não pode ser nulo.");
-    if (name.trim().isEmpty()) {
-      throw new IllegalArgumentException("O nome do tipo de status não pode ser vazio.");
-    }
+  @Override
+  public String toString() {
+    return "StatusType{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        '}';
   }
-
-
-  // --- equals(), hashCode() e toString() ---
-
 }

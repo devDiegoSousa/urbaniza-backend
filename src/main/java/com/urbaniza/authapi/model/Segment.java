@@ -1,95 +1,61 @@
 package com.urbaniza.authapi.model;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "segments",
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_segment_name_department", columnNames = {"name", "department_id"})
-    })
+@Table(name = "segments", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "department_id"})
+})
 public class Segment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
   private Long id;
 
   @Column(name = "name", nullable = false, length = 50)
   private String name;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "department_id", nullable = false, foreignKey = @ForeignKey(name = "fk_segment_department"))
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id", nullable = false)
   private Department department;
 
-  @OneToMany(
-      mappedBy = "segment",
-      cascade = { CascadeType.PERSIST, CascadeType.MERGE }, // Apenas propaga persistência e merge
-      orphanRemoval = false, // Não remove denúncias se forem desassociadas
-      fetch = FetchType.LAZY
-  )
-  private List<Report> reports = new ArrayList<>();
+  // Constructors
+  public Segment() {}
 
-  protected Segment() {}
   public Segment(String name, Department department) {
-    Objects.requireNonNull(name, "O nome do segmento não pode ser nulo.");
-    Objects.requireNonNull(department, "O departamento do segmento não pode ser nulo.");
-    if (name.trim().isEmpty()) {
-      throw new IllegalArgumentException("O nome do segmento não pode ser vazio.");
-    }
-
-    this.name = name.trim();
+    this.name = name;
     this.department = department;
   }
 
-  // --- Getters & Setters---
-
+  // Getters & Setters
   public Long getId() {return id;}
+  public void setId(Long id) {this.id = id;}
 
   public String getName() {return name;}
-  public void setName(String name) {
-    Objects.requireNonNull(name, "O nome do segmento não pode ser nulo.");
-    if (name.trim().isEmpty()) {
-      throw new IllegalArgumentException("O nome do segmento não pode ser vazio.");
-    }
-    this.name = name.trim();
-  }
+  public void setName(String name) {this.name = name;}
 
   public Department getDepartment() {return department;}
-  protected void setDepartment(Department department) {this.department = department;}
+  public void setDepartment(Department department) {this.department = department;}
 
-
-  public List<Report> getReports() {return reports;}
-  public void setReports(List<Report> reports) {this.reports = reports;}
-
-  // --- Helper methods ---
-
-  public void addReport(Report report) {
-    if (this.reports == null) {
-      this.reports = new ArrayList<>();
-    }
-    this.reports.add(report);
-    report.setSegment(this);
+  // equals, hashCode, toString
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Segment segment = (Segment) o;
+    return Objects.equals(id, segment.id);
   }
 
-  public void removeReport(Report report) {
-    if (this.reports != null) {
-      this.reports.remove(report);
-      report.setSegment(null); // Assume que Report tem um setSegment
-    }
-  }
-
-
-  // --- equals(), hashCode() e toString() ---
+  @Override
+  public int hashCode() {return Objects.hash(id);}
 
   @Override
   public String toString() {
     return "Segment{" +
         "id=" + id +
         ", name='" + name + '\'' +
-        ", departmentId=" + (department != null ? department.getId() : "null") +
+        ", departmentId=" + (department != null ? department.getId() : null) +
         '}';
   }
 }
