@@ -1,102 +1,225 @@
 package com.urbaniza.authapi.service;
 
-import com.urbaniza.authapi.dto.report.CreateReportDTO;
+import com.urbaniza.authapi.dto.report.CreateReportRequestDTO;
 import com.urbaniza.authapi.dto.report.ResponseReportDTO;
-import com.urbaniza.authapi.enums.ReportStatus;
+import com.urbaniza.authapi.dto.report.UpdateReportStatusRequestDTO;
+import com.urbaniza.authapi.dto.report.ReporterInfoDTO;
+import com.urbaniza.authapi.exception.InvalidInputException;
+import com.urbaniza.authapi.exception.ResourceNotFoundException;
+import com.urbaniza.authapi.exception.UnauthorizedOperationException;
+import com.urbaniza.authapi.model.Department;
 import com.urbaniza.authapi.model.Report;
+import com.urbaniza.authapi.model.Segment;
+import com.urbaniza.authapi.model.StatusHistory;
+import com.urbaniza.authapi.model.StatusType;
 import com.urbaniza.authapi.model.User;
+import com.urbaniza.authapi.enums.UserRole;
+import com.urbaniza.authapi.repository.DepartmentRepository;
 import com.urbaniza.authapi.repository.ReportRepository;
+import com.urbaniza.authapi.repository.SegmentRepository;
+import com.urbaniza.authapi.repository.StatusHistoryRepository;
+import com.urbaniza.authapi.repository.StatusTypeRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.stream;
 
 @Service
 public class ReportService {
 
-    @Autowired
-    private ReportRepository reportRepository;
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
+    private final SegmentRepository segmentRepository;
+    private final StatusTypeRepository statusTypeRepository;
+    private final DepartmentRepository departmentRepository;
+    private final StatusHistoryRepository statusHistoryRepository;
+
+    private static final String INITIAL_STATUS_NAME = "Novo";
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired(required = false)
-    private CloudinaryService cloudinaryService;
+    public ReportService(ReportRepository reportRepository,
+                         UserRepository userRepository,
+                         SegmentRepository segmentRepository,
+                         StatusTypeRepository statusTypeRepository,
+                         DepartmentRepository departmentRepository,
+                         StatusHistoryRepository statusHistoryRepository) {
+        this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
+        this.segmentRepository = segmentRepository;
+        this.statusTypeRepository = statusTypeRepository;
+        this.departmentRepository = departmentRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
+    }
 
     @Transactional
-    public ResponseReportDTO createReport(CreateReportDTO createReportDTO, MultipartFile photoFile) throws IOException {
-        Optional<User> userOptional = userRepository.findById(createReportDTO.getUserId());
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("User with ID " + createReportDTO.getUserId() + " not found.");
-        }
-        User user = userOptional.get();
-        Report report = new Report();
-        report.setTitle(createReportDTO.getTitle());
-        report.setDescription(createReportDTO.getDescription());
-        report.setLatitude(createReportDTO.getLatitude());
-        report.setLongitude(createReportDTO.getLongitude());
-        report.setUser(user);
-        report.setAnonymous(createReportDTO.isAnonymous());
-        report.setStatus(ReportStatus.NEW);
+    public ResponseReportDTO createReport(CreateReportRequestDTO createRequestDTO, String authenticatedUserEmail) {
+        User citizen = userRepository.findByEmail(authenticatedUserEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("User citizen not founded with email: " + authenticatedUserEmail));
 
-        if (photoFile != null && !photoFile.isEmpty() && cloudinaryService != null) {
-            Map uploadResult = cloudinaryService.uploadImage(photoFile);
-            report.setPhotoUrl(uploadResult.get("url").toString());
-            report.setPhotoPublicId(uploadResult.get("public_id").toString());
+        // Security check
+        //  If it is not null and not equal
+        //    "ERROR: Fraud attempt!"
+        if (createRequestDTO.getUserId() != null && !createRequestDTO.getUserId().equals(citizen.getId())) {
+            throw new UnauthorizedOperationException("The userId provided in the DTO does not match the authenticated user.");
         }
+
+        // Security check
+        if (citizen.getRole() != UserRole.CITIZEN) {
+            throw new UnauthorizedOperationException("Only CITIZEN users can create reports.");
+        }
+
+        // Check segment
+        Segment segment = segmentRepository.findById(createRequestDTO.getSegmentId())
+            .orElseThrow(() -> new ResourceNotFoundException("Segment not found with ID: " + createRequestDTO.getSegmentId()));
+
+        StatusType initialStatus = statusTypeRepository.findByNameIgnoreCase(INITIAL_STATUS_NAME)
+            .orElseThrow(() -> new IllegalStateException("Initial status'" + INITIAL_STATUS_NAME + "' not configured in the system."));
+
+        Report report = new Report();
+        report.setTitle(createRequestDTO.getTitle());
+        report.setDescription(createRequestDTO.getDescription());
+        report.setLatitude(createRequestDTO.getLatitude());
+        report.setLongitude(createRequestDTO.getLongitude());
+        report.setAnonymous(createRequestDTO.isAnonymous() != null ? createRequestDTO.isAnonymous() : false);
+        report.setPhotoUrl(createRequestDTO.getPhotoUrl());
+        report.setPhotoPublicId(createRequestDTO.getPhotoPublicId());
+        report.setUser(citizen);
+        report.setSegment(segment);
+        report.setStatus(initialStatus);
 
         Report savedReport = reportRepository.save(report);
-        return convertToResponseDTO(savedReport);
+        createStatusHistoryEntry(savedReport, initialStatus, initialStatus, citizen);
+        return convertToResponseReportDTO(savedReport);
     }
 
-    // Return a report by its Id
-    public Optional<ResponseReportDTO> findReportById(Long id) {
-        return reportRepository.findById(id)
-                .map(this::convertToResponseDTO);
+    @Transactional(readOnly = true)
+    public List<ResponseReportDTO> getReportsForCitizen(String authenticatedUserEmail) {
+        User citizen = userRepository.findByEmail(authenticatedUserEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário cidadão não encontrado com o email: " + authenticatedUserEmail));
+
+
+       // confirms if the user role is citizen
+        if (citizen.getRole() != UserRole.CITIZEN) {
+            throw new UnauthorizedOperationException("Operation not allowed for this user type.");
+        }
+
+        // List of all reports for a user
+        List<Report> reports = reportRepository.findReportsByUser(citizen);
+        return reports.stream()
+            .map(this::convertToResponseReportDTO)
+            .collect(Collectors.toList());
     }
 
-    // Returns all reports created
-    public List<ResponseReportDTO> findAllReports() {
+    @Transactional(readOnly = true)
+    public List<ResponseReportDTO> getReportsForDepartment(String authenticatedUserEmail) {
+        User departmentUser = userRepository.findByEmail(authenticatedUserEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário de departamento não encontrado com o email: " + authenticatedUserEmail));
 
-        return reportRepository.findAll().stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+        if (departmentUser.getRole() != UserRole.DEPARTMENT) {
+            throw new UnauthorizedOperationException("Apenas usuários DEPARTMENT podem visualizar denúncias por departamento.");
+        }
+        // confirms if the user email matches a department's email
+        Department department = departmentRepository.findByEmail(departmentUser.getEmail())
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found for user: " + authenticatedUserEmail + ". Check if the user's email matches a department's email."));
+
+        // List of all department reports
+        List<Report> reports = reportRepository.findByDepartment(department);
+        return reports.stream()
+            .map(this::convertToResponseReportDTO)
+            .collect(Collectors.toList());
     }
 
-    // Returns all reports with the same userId
-    public List<ResponseReportDTO> findReportByUserId(Long id) {
-        return reportRepository.findByUserId(id)
-                .stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
+    @Transactional
+    public ResponseReportDTO updateReportStatus(Long reportId, UpdateReportStatusRequestDTO statusUpdateDTO, String authenticatedUserEmail) {
+        User departmentUser = userRepository.findByEmail(authenticatedUserEmail)
+            .orElseThrow(() -> new ResourceNotFoundException("Department user not found with email: " + authenticatedUserEmail));
+
+        // Confirm if the user role is department
+        if (departmentUser.getRole() != UserRole.DEPARTMENT) {
+            throw new UnauthorizedOperationException("Only the DEPARTMENT user can update the status of reports.");
+        }
+
+        // Search for a department with the user's email
+        Department department = departmentRepository.findByEmail(departmentUser.getEmail())
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found for user: " + authenticatedUserEmail));
+
+        // Search for a reports by id and department
+        Report report = reportRepository.findByIdAndDepartment(reportId, department)
+            .orElseThrow(() -> new ResourceNotFoundException("Denúncia com ID " + reportId + " não encontrada ou não pertence a este departamento."));
+
+        // Save old status
+        StatusType oldStatus = report.getStatus();
+        // Search new status by id
+        StatusType newStatus = statusTypeRepository.findById(statusUpdateDTO.getNewStatusId())
+            .orElseThrow(() -> new ResourceNotFoundException("New status type not found with ID: " + statusUpdateDTO.getNewStatusId()));
+
+        // If old status is same as new status: ERROR
+        if (oldStatus.getId().equals(newStatus.getId())) {
+            throw new InvalidInputException("The report already has the status '" + newStatus.getName() + "'. No changes made.");
+        }
+
+        // Set the new status for the report
+        report.setStatus(newStatus);
+        // Save updated report
+        Report updatedReport = reportRepository.save(report);
+        // Create a status history entry
+        createStatusHistoryEntry(updatedReport, newStatus, oldStatus, departmentUser);
+        return convertToResponseReportDTO(updatedReport);
     }
 
-    // Create a response for any request CreateReport
-    private ResponseReportDTO convertToResponseDTO(Report report) {
-        ResponseReportDTO responseDTO = new ResponseReportDTO();
-        responseDTO.setId(report.getId());
-        responseDTO.setTitle(report.getTitle());
-        responseDTO.setDescription(report.getDescription());
-        responseDTO.setLatitude(report.getLatitude());
-        responseDTO.setLongitude(report.getLongitude());
-        responseDTO.setCreationDateTime(report.getCreationDateTime());
-        responseDTO.setPhotoUrl(report.getPhotoUrl());
-        responseDTO.setPhotoPublicId(report.getPhotoPublicId());
-        responseDTO.setStatus(report.getStatus());
-        responseDTO.setUserId(report.getUser().getId());
-        responseDTO.setAnonymous(report.isAnonymous());
-        return responseDTO;
+    private void createStatusHistoryEntry(Report report, StatusType currentStatus, StatusType previousStatus, User modifiedBy) {
+        StatusHistory historyEntry = new StatusHistory();
+        historyEntry.setReport(report);
+        historyEntry.setCurrentStatus(currentStatus);
+        historyEntry.setPreviousStatus(previousStatus);
+        historyEntry.setModifiedBy(modifiedBy);
+        statusHistoryRepository.save(historyEntry);
     }
 
-    // Outros métodos do serviço (atualização, exclusão, etc.) seriam implementados aqui
+    private ResponseReportDTO convertToResponseReportDTO(Report report) {
+        ResponseReportDTO dto = new ResponseReportDTO();
+        dto.setId(report.getId());
+        dto.setTitle(report.getTitle());
+        dto.setDescription(report.getDescription());
+        dto.setLatitude(report.getLatitude());
+        dto.setLongitude(report.getLongitude());
+        dto.setCreatedAt(report.getCreatedAt());
+        dto.setPhotoUrl(report.getPhotoUrl());
+        dto.setAnonymous(report.getAnonymous());
+
+        if (!report.getAnonymous() && report.getUser() != null) {
+            User reporter = report.getUser();
+            ReporterInfoDTO reporterInfo = new ReporterInfoDTO(
+                reporter.getId(),
+                reporter.getFirstName(),
+                reporter.getLastName(),
+                reporter.getEmail()
+            );
+            dto.setReporterInfo(reporterInfo);
+        }
+
+        if (report.getStatus() != null) {
+            dto.setStatusId(report.getStatus().getId());
+            dto.setStatusName(report.getStatus().getName());
+        }
+
+        if (report.getSegment() != null) {
+            Segment segment = report.getSegment();
+            dto.setSegmentId(segment.getId());
+            dto.setSegmentName(segment.getName());
+            if (segment.getDepartment() != null) {
+                Department department = segment.getDepartment();
+                dto.setDepartmentId(department.getId());
+                dto.setDepartmentName(department.getName());
+                if (department.getCity() != null) {
+                    dto.setCityId(department.getCity().getId());
+                    dto.setCityName(department.getCity().getName());
+                }
+            }
+        }
+        return dto;
+    }
 }
