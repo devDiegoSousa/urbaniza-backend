@@ -1,12 +1,10 @@
-// DTO: com.urbaniza.authapi.dto.report.CreateReportDTO.java
 package com.urbaniza.authapi.dto.report;
 
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
-public class CreateReportDTO {
+public class CreateReportRequestDTO {
 
     @NotBlank(message = "Title cannot be blank.")
     @Size(max = 255, message = "Title cannot exceed 255 characters")
@@ -42,8 +40,8 @@ public class CreateReportDTO {
     private String photoPublicId;
 
     // Constructors
-    public CreateReportDTO() {}
-    public ReportCreateRequestDTO(String title, String description, BigDecimal latitude, BigDecimal longitude, Long segmentId, Boolean anonymous, String photoUrl, String photoPublicId) {
+    public CreateReportRequestDTO() {}
+    public CreateReportRequestDTO(String title, String description, BigDecimal latitude, BigDecimal longitude, Long segmentId, Boolean anonymous, String photoUrl, String photoPublicId) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
@@ -105,7 +103,7 @@ public class CreateReportDTO {
     // toString
     @Override
     public String toString() {
-        return "ReportCreateRequestDTO{" +
+        return "CreateReportRequestDTO{" +
             "title='" + title + '\'' +
             ", description='" + (description != null ? description.substring(0, Math.min(description.length(), 30)) + "..." : "null") + '\'' +
             ", latitude=" + latitude +
@@ -116,5 +114,4 @@ public class CreateReportDTO {
             ", photoPublicId='" + photoPublicId + '\'' +
             '}';
     }
-}
 }
