@@ -8,4 +8,5 @@ import com.urbaniza.authapi.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email); // Checks if a user exists with the provided email.
 }
