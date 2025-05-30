@@ -6,7 +6,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,54 +17,43 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
-
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
-  @Autowired
-  private JwtUtils jwtUtils;
+  private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
-  @Autowired
-  private UserDetailsServiceImpl userDetailsService;
+  private final JwtUtils jwtUtils;
+  private final UserDetailsServiceImpl userDetailsService;
 
-  private static final List<String> PUBLIC_URLS = List.of(
-      "/auth/signup",
-      "/auth/signin"
-  );
-
-  @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    String path = request.getRequestURI();
-    return PUBLIC_URLS.stream().anyMatch(path::startsWith);
+  public AuthTokenFilter(JwtUtils jwtUtils, UserDetailsServiceImpl userDetailsService){
+    this.jwtUtils = jwtUtils;
+    this.userDetailsService = userDetailsService;
   }
+
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      System.out.println("AuthTokenFilter");
 
       String jwt = parseJwt(request);
-      System.out.println("TOKEN RECEBIDO: " + jwt);
+
+      // logger.debug("AuthTokenFilter: Processando requisição para {}", request.getRequestURI());
+      // logger.debug("AuthTokenFilter: Token JWT extraído: {}", jwt);
+
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
-        String role = jwtUtils.getRoleFromJwtToken(jwt);
-
-        if (!role.startsWith("ROLE_")) {
-          role = "ROLE_" + role;
-        }
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        String email = jwtUtils.getUserNameFromJwtToken(jwt);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        // logger.debug("AuthTokenFilter: Usuário '{}' autenticado com sucesso com roles: {}", username, userDetails.getAuthorities());
       }
     } catch (Exception e) {
-      logger.error("Não foi possível definir a autenticação do usuário: {}", e);
+      logger.error("Não foi possível definir a autenticação do usuário: {}", e.getMessage());
     }
 
     filterChain.doFilter(request, response);
