@@ -27,9 +27,6 @@ public class CreateReportRequestDTO {
     @NotNull(message = "segment is required.")
     private Long segmentId;
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
-
     @NotNull(message = "Information about anonymity is required (true or false).")
     private boolean anonymous;
 
@@ -84,12 +81,6 @@ public class CreateReportRequestDTO {
     public Long getSegmentId() {return segmentId;}
     public void setSegmentId(Long segmentId) {this.segmentId = segmentId;}
 
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
     public Boolean isAnonymous() {return anonymous;}
     public void setAnonymous(Boolean anonymous) {this.anonymous = anonymous;}

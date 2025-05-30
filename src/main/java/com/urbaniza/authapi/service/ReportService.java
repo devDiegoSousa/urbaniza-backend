@@ -60,13 +60,6 @@ public class ReportService {
             .orElseThrow(() -> new ResourceNotFoundException("User citizen not founded with email: " + authenticatedUserEmail));
 
         // Security check
-        //  If it is not null and not equal
-        //    "ERROR: Fraud attempt!"
-        if (createRequestDTO.getUserId() != null && !createRequestDTO.getUserId().equals(citizen.getId())) {
-            throw new UnauthorizedOperationException("The userId provided in the DTO does not match the authenticated user.");
-        }
-
-        // Security check
         if (citizen.getRole() != UserRole.CITIZEN) {
             throw new UnauthorizedOperationException("Only CITIZEN users can create reports.");
         }
