@@ -1,14 +1,10 @@
-// Model: com.urbaniza.authapi.model.Report.java
 package com.urbaniza.authapi.model;
 
-import com.urbaniza.authapi.enums.ReportStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.CreationTimestamp;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,175 +12,132 @@ import java.util.Objects;
 public class Report {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(max = 255, message = "Title cannot exceed 255 characters")
+    @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @NotBlank(message = "Description is required")
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, columnDefinition="TEXT")
     private String description;
 
-    @NotNull(message = "Latitude is required")
-    @Column(nullable = false)
-    private Double latitude;
+    @Column(name = "latitude", nullable = false, precision = 9, scale = 6)
+    private BigDecimal latitude;
 
-    @NotNull(message = "Longitude is required")
-    @Column(nullable = false)
-    private Double longitude;
+    @Column(name = "longitude", nullable = false, precision = 9, scale = 6)
+    private BigDecimal longitude;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime creationDateTime;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column
+    @Column(name = "photo_url", length = 255)
     private String photoUrl;
 
-    @Column(length = 255)
+    @Column(name = "photo_public_id", length = 255)
     private String photoPublicId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReportStatus status;
+    @Column(name = "anonymous", nullable = false)
+    private Boolean anonymous = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @NotNull(message = "User ID is required")
-    private User user;
+    private User user; // O cidadão que criou o report
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean anonymous;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "status_id", nullable = false)
+    private StatusType status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "segment_id", nullable = false)
+    private Segment segment;
+
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StatusHistory> statusHistories = new ArrayList<>();
+
+    // Constructors
+    public Report() {}
+
+    public Report(String title, String description, BigDecimal latitude, BigDecimal longitude, Boolean anonymous, User user, StatusType status, Segment segment) {
+        this.title = title;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.anonymous = anonymous;
+        this.user = user;
+        this.status = status;
+        this.segment = segment;
+    }
+
 
     @PrePersist
     protected void onCreate() {
-        if (this.status == null) {
-            this.status = ReportStatus.NEW;
+        this.createdAt = LocalDateTime.now();
+        if (this.anonymous == null) {
+            this.anonymous = false;
         }
     }
 
-    public Report() {
-    }
+    // Getters e Setters
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public Report(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, User user, boolean anonymous) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.creationDateTime = creationDateTime;
-        this.photoUrl = photoUrl;
-        this.photoPublicId = photoPublicId;
-        this.status = status;
-        this.user = user;
-        this.anonymous = anonymous;
-    }
+    public String getTitle() {return title;}
+    public void setTitle(String title) {this.title = title;}
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getDescription() {return description;}
+    public void setDescription(String description) {this.description = description;}
 
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public BigDecimal getLatitude() {return latitude;}
+    public void setLatitude(BigDecimal latitude) {this.latitude = latitude;}
 
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public BigDecimal getLongitude() {return longitude;}
+    public void setLongitude(BigDecimal longitude) {this.longitude = longitude;}
 
-    public Double getLatitude() {
-        return latitude;
-    }
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
+    public LocalDateTime getCreatedAt() {return createdAt;}
+    public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;}
 
-    public Double getLongitude() {
-        return longitude;
-    }
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
+    public String getPhotoUrl() {return photoUrl;}
+    public void setPhotoUrl(String photoUrl) {this.photoUrl = photoUrl;}
 
-    public LocalDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-    public void setCreationDateTime(LocalDateTime creationDateTime) {
-        this.creationDateTime = creationDateTime;
-    }
+    public String getPhotoPublicId() {return photoPublicId;}
+    public void setPhotoPublicId(String photoPublicId) {this.photoPublicId = photoPublicId;}
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
+    public Boolean getAnonymous() {return anonymous;}
+    public void setAnonymous(Boolean anonymous) {this.anonymous = anonymous;}
 
-    public String getPhotoPublicId() {
-        return photoPublicId;
-    }
-    public void setPhotoPublicId(String photoPublicId) {
-        this.photoPublicId = photoPublicId;
-    }
+    public User getUser() {return user;}
+    public void setUser(User user) {this.user = user;}
 
-    public ReportStatus getStatus() {
-        return status;
-    }
-    public void setStatus(ReportStatus status) {
-        this.status = status;
-    }
+    public StatusType getStatus() {return status;}
+    public void setStatus(StatusType status) {this.status = status;}
 
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
-    }
+    public Segment getSegment() {return segment;}
+    public void setSegment(Segment segment) {this.segment = segment;}
 
-    public boolean isAnonymous() {
-        return anonymous;
-    }
-    public void setAnonymous(boolean anonymous) {
-        this.anonymous = anonymous;
-    }
+    public List<StatusHistory> getStatusHistories() {return statusHistories;}
+    public void setStatusHistories(List<StatusHistory> statusHistories) {this.statusHistories = statusHistories;}
 
+    // equals, hashCode, toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Report report = (Report) o;
-        return anonymous == report.anonymous && Objects.equals(id, report.id) && Objects.equals(title, report.title) && Objects.equals(description, report.description) && Objects.equals(latitude, report.latitude) && Objects.equals(longitude, report.longitude) && Objects.equals(creationDateTime, report.creationDateTime) && Objects.equals(photoUrl, report.photoUrl) && Objects.equals(photoPublicId, report.photoPublicId) && status == report.status && Objects.equals(user, report.user);
+        return Objects.equals(id, report.id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, title, description, latitude, longitude, creationDateTime, photoUrl, photoPublicId, status, user, anonymous);
-    }
+    public int hashCode() {return Objects.hash(id);}
 
     @Override
     public String toString() {
         return "Report{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", creationDateTime=" + creationDateTime +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", photoPublicId='" + photoPublicId + '\'' +
-                ", status=" + status +
-                ", user=" + (anonymous ? "Anonymous" : user.getId()) +
-                ", anonymous=" + anonymous +
-                '}';
+            "id=" + id +
+            ", title='" + title + '\'' +
+            ", anonymous=" + anonymous +
+            ", userId=" + (user != null ? user.getId() : null) +
+            ", statusId=" + (status != null ? status.getId() : null) +
+            ", segmentId=" + (segment != null ? segment.getId() : null) +
+            '}';
     }
 }

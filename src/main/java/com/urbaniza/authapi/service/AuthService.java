@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
+import com.urbaniza.authapi.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,7 +14,7 @@ import com.urbaniza.authapi.repository.TokenRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
-import com.urbaniza.authapi.security.JwtUtils;
+import com.urbaniza.authapi.util.JwtUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,15 +35,16 @@ public class AuthService {
 
 
     public void signup(SignupRequestDTO signupRequestDTO) throws Exception {
+        Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
+        if (userFound.isPresent()) {throw new Exception("Email já existe");}
+
         User user = new User();
         user.setEmail(signupRequestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
         user.setFirstName(signupRequestDTO.getFirstName());
         user.setLastName(signupRequestDTO.getLastName());
 
-        Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
-
-        if (userFound.isPresent()) {throw new Exception("Email já existe");}
+        user.setRole(UserRole.CITIZEN);
 
         // Gera o token e atualiza o usuário
         String confirmationToken = UUID.randomUUID().toString();

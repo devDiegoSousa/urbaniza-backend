@@ -1,146 +1,96 @@
-// DTO: com.urbaniza.authapi.dto.report.ReportResponseDTO.java
 package com.urbaniza.authapi.dto.report;
 
-import com.urbaniza.authapi.enums.ReportStatus;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+@JsonInclude(JsonInclude.Include.NON_NULL) // Do not include null fields in response JSON
 public class ResponseReportDTO {
 
     private Long id;
     private String title;
     private String description;
-    private Double latitude;
-    private Double longitude;
-    private LocalDateTime creationDateTime;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private LocalDateTime createdAt;
     private String photoUrl;
-    private String photoPublicId;
-    private ReportStatus status;
-    private Long userId;
-    private boolean anonymous;
+    private Boolean anonymous;
+    private ReporterInfoDTO reporterInfo; // Null if is anonymous
+    private String statusName;
+    private Long statusId;
+    private String segmentName;
+    private Long segmentId;
+    private String departmentName;
+    private Long departmentId;
+    private String cityName;
+    private Long cityId;
 
-    public ResponseReportDTO() {
-    }
+    // Constructors
+    public ResponseReportDTO(){}
 
-    public ResponseReportDTO(Long id, String title, String description, Double latitude, Double longitude, LocalDateTime creationDateTime, String photoUrl, String photoPublicId, ReportStatus status, Long userId, boolean anonymous) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.creationDateTime = creationDateTime;
-        this.photoUrl = photoUrl;
-        this.photoPublicId = photoPublicId;
-        this.status = status;
-        this.userId = userId;
-        this.anonymous = anonymous;
-    }
+    // Getters & Setters
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() {return title;}
+    public void setTitle(String title) {this.title = title;}
 
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public String getDescription() {return description;}
+    public void setDescription(String description) {this.description = description;}
 
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public BigDecimal getLatitude() {return latitude;}
+    public void setLatitude(BigDecimal latitude) {this.latitude = latitude;}
 
-    public Double getLatitude() {
-        return latitude;
-    }
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
+    public BigDecimal getLongitude() {return longitude;}
+    public void setLongitude(BigDecimal longitude) {this.longitude = longitude;}
 
-    public Double getLongitude() {
-        return longitude;
-    }
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
+    public LocalDateTime getCreatedAt() {return createdAt;}
+    public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;}
 
-    public LocalDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-    public void setCreationDateTime(LocalDateTime creationDateTime) {
-        this.creationDateTime = creationDateTime;
-    }
+    public String getPhotoUrl() {return photoUrl;}
+    public void setPhotoUrl(String photoUrl) {this.photoUrl = photoUrl;}
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
+    public Boolean getAnonymous() {return anonymous;}
+    public void setAnonymous(Boolean anonymous) {this.anonymous = anonymous;}
 
-    public String getPhotoPublicId() {
-        return photoPublicId;
-    }
-    public void setPhotoPublicId(String photoPublicId) {
-        this.photoPublicId = photoPublicId;
-    }
+    public ReporterInfoDTO getReporterInfo() {return reporterInfo;}
+    public void setReporterInfo(ReporterInfoDTO reporterInfo) {this.reporterInfo = reporterInfo;}
 
-    public ReportStatus getStatus() {
-        return status;
-    }
-    public void setStatus(ReportStatus status) {
-        this.status = status;
-    }
+    public String getStatusName() {return statusName;}
+    public void setStatusName(String statusName) {this.statusName = statusName;}
 
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    public Long getStatusId() {return statusId;}
+    public void setStatusId(Long statusId) {this.statusId = statusId;}
 
-    public boolean isAnonymous() {
-        return anonymous;
-    }
-    public void setAnonymous(boolean anonymous) {
-        this.anonymous = anonymous;
-    }
+    public String getSegmentName() {return segmentName;}
+    public void setSegmentName(String segmentName) {this.segmentName = segmentName;}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        ResponseReportDTO that = (ResponseReportDTO) object;
-        return anonymous == that.anonymous && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(latitude, that.latitude) && Objects.equals(longitude, that.longitude) && Objects.equals(creationDateTime, that.creationDateTime) && Objects.equals(photoUrl, that.photoUrl) && Objects.equals(photoPublicId, that.photoPublicId) && status == that.status && Objects.equals(userId, that.userId);
-    }
+    public Long getSegmentId() {return segmentId;}
+    public void setSegmentId(Long segmentId) {this.segmentId = segmentId;}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, title, description, latitude, longitude, creationDateTime, photoUrl, photoPublicId, status, userId, anonymous);
-    }
+    public String getDepartmentName() {return departmentName;}
+    public void setDepartmentName(String departmentName) {this.departmentName = departmentName;}
 
+    public Long getDepartmentId() {return departmentId;}
+    public void setDepartmentId(Long departmentId) {this.departmentId = departmentId;}
+
+    public String getCityName() {return cityName;}
+    public void setCityName(String cityName) {this.cityName = cityName;}
+
+    public Long getCityId() {return cityId;}
+    public void setCityId(Long cityId) {this.cityId = cityId;}
+
+    // toString
     @Override
     public String toString() {
         return "ReportResponseDTO{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", creationDateTime=" + creationDateTime +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", photoPublicId='" + photoPublicId + '\'' +
-                ", status=" + status +
-                ", userId=" + userId +
-                ", anonymous=" + anonymous +
-                '}';
+            "id=" + id +
+            ", title='" + title + '\'' +
+            ", anonymous=" + anonymous +
+            ", statusName='" + statusName + '\'' +
+            ", segmentName='" + segmentName + '\'' +
+            ", departmentName='" + departmentName + '\'' +
+            ", cityName='" + cityName + '\'' +
+            '}';
     }
 }
