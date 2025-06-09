@@ -1,7 +1,7 @@
 services:
   urbdb:
     image: postgres:17.4-alpine
-    container_name: urbdb
+    container_name: urb-db
     restart: always
     environment:
       POSTGRES_PASSWORD: urbanizapassword
@@ -14,12 +14,13 @@ services:
     networks:
       - local-network
 
-  my-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: urbaniza
-    container_name: urbaniza
+  urb-app:
+    container_name: urb-app
+    image: maven:3.8.4-openjdk-17
+    command: mvn spring-boot:run
+    volumes:
+      - .:/app
+    working_dir: /app
     restart: always
     depends_on:
       - urbdb
