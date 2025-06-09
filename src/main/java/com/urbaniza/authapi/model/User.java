@@ -33,7 +33,7 @@ public class User implements UserDetails {
     @Column(name = "confirmation_token", unique = true)
     private String confirmationToken;
 
-    @Column(nullable = false)
+    @Column(name = "email_confirmed", nullable = false)
     private boolean emailConfirmed = false; // Default false
 
     public String getConfirmationToken() {
