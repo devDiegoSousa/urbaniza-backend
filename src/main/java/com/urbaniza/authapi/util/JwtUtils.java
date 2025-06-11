@@ -1,5 +1,7 @@
 package com.urbaniza.authapi.util;
 
+import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
+import com.urbaniza.authapi.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -68,7 +70,7 @@ public class JwtUtils {
   public boolean validateJwtToken(String token) {
     try {
       Jwts.parserBuilder()
-        .setSigningKey(this.key) // Usa a chave HMAC-SHA gerada
+        .setSigningKey(this.key)
         .build()
         .parseClaimsJws(token);
       return true;
@@ -115,6 +117,17 @@ public class JwtUtils {
       .setExpiration(new Date(System.currentTimeMillis() + jwtRefreshExpirationMs))
       .signWith(this.key, SignatureAlgorithm.HS512)
       .compact();
+  }
+
+  public String generateConfirmEmailToken(SignupRequestDTO signupRequestDTO) {
+    long twoHundredYearsInMillis = 6311520000000L;
+
+    return Jwts.builder()
+        .setSubject(signupRequestDTO.getEmail())
+        .setIssuedAt(new Date())
+        .setExpiration(new Date(System.currentTimeMillis() + twoHundredYearsInMillis))
+        .signWith(this.key, SignatureAlgorithm.HS512)
+        .compact();
   }
 
   // Checks if the JWT token is expired.

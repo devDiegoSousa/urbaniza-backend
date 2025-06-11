@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.urbaniza.authapi.model.User;
-import com.urbaniza.authapi.repository.TokenRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
@@ -25,8 +24,6 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private TokenRepository tokenRepository;
-    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtils jwtUtils;
@@ -38,20 +35,18 @@ public class AuthService {
         Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
         if (userFound.isPresent()) {throw new Exception("Email já existe");}
 
+        String confirmationToken = jwtUtils.generateConfirmEmailToken(signupRequestDTO);
+
         User user = new User();
+        user.setConfirmationToken(confirmationToken);
         user.setEmail(signupRequestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequestDTO.getPassword()));
         user.setFirstName(signupRequestDTO.getFirstName());
         user.setLastName(signupRequestDTO.getLastName());
-
         user.setRole(UserRole.CITIZEN);
+        
+        userRepository.save(user);
 
-        // Gera o token e atualiza o usuário
-        String confirmationToken = UUID.randomUUID().toString();
-        user.setConfirmationToken(confirmationToken);
-        userRepository.save(user); // Salva no banco
-
-        // Envia o email (chama o EmailService)
         emailService.sendConfirmationEmail(user.getEmail(), confirmationToken);
     }
 
