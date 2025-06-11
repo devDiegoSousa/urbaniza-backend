@@ -8,15 +8,19 @@ import com.urbaniza.authapi.service.ReportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reports") // Define o caminho base para todas as rotas de denúncias
+@RequestMapping("/api/v1/reports")
 public class ReportController {
 
     private final ReportService reportService;
@@ -26,17 +30,28 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    // ======================
     // Citizen user endpoints
+    // ======================
 
-
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('CITIZEN')")
     public ResponseEntity<ResponseReportDTO> createReport(
-        @Valid @RequestBody CreateReportRequestDTO createRequestDTO,
+        @RequestPart(value = "report") CreateReportRequestDTO createRequestDTO,
+        @RequestPart(value = "photo", required = false) MultipartFile photo,
         @AuthenticationPrincipal User authenticatedUser) {
 
-        ResponseReportDTO createdReport = reportService.createReport(createRequestDTO, authenticatedUser.getEmail());
-        return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
+        try {
+            ResponseReportDTO createdReport = reportService.createReport(createRequestDTO, photo, authenticatedUser);
+            return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
+        } catch (IOException e) {
+            // Tratar melhor o erro
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload photo: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            // Tratar melhor o erro
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
     }
 
     /**

@@ -41,7 +41,7 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // O cidadão que criou o report
+    private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status_id", nullable = false)

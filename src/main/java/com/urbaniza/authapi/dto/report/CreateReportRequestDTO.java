@@ -28,25 +28,17 @@ public class CreateReportRequestDTO {
     private Long segmentId;
 
     @NotNull(message = "Information about anonymity is required (true or false).")
-    private boolean anonymous;
-
-    @Size(max = 255, message = "Photo URL cannot exceed 255 characters")
-    private String photoUrl;
-
-    @Size(max = 255, message = "Public photo id cannot exceed 255 characters")
-    private String photoPublicId;
+    private boolean anonymous = false;
 
     // Constructors
     public CreateReportRequestDTO() {}
-    public CreateReportRequestDTO(String title, String description, BigDecimal latitude, BigDecimal longitude, Long segmentId, Boolean anonymous, String photoUrl, String photoPublicId) {
+    public CreateReportRequestDTO(String title, String description, BigDecimal latitude, BigDecimal longitude, Long segmentId, Boolean anonymous) {
         this.title = title;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
         this.segmentId = segmentId;
         this.anonymous = anonymous;
-        this.photoUrl = photoUrl;
-        this.photoPublicId = photoPublicId;
     }
 
     // Getters & Setters
@@ -85,12 +77,6 @@ public class CreateReportRequestDTO {
     public Boolean isAnonymous() {return anonymous;}
     public void setAnonymous(Boolean anonymous) {this.anonymous = anonymous;}
 
-    public String getPhotoUrl() {return photoUrl;}
-    public void setPhotoUrl(String photoUrl) {this.photoUrl = photoUrl;}
-
-    public String getPhotoPublicId() {return photoPublicId;}
-    public void setPhotoPublicId(String photoPublicId) {this.photoPublicId = photoPublicId;}
-
     // toString
     @Override
     public String toString() {
@@ -101,8 +87,6 @@ public class CreateReportRequestDTO {
             ", longitude=" + longitude +
             ", segmentId=" + segmentId +
             ", anonymous=" + anonymous +
-            ", photoUrl='" + photoUrl + '\'' +
-            ", photoPublicId='" + photoPublicId + '\'' +
             '}';
     }
 }

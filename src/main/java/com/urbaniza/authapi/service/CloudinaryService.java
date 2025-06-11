@@ -33,9 +33,6 @@ public class CloudinaryService {
     }
 
     public Map uploadImage(MultipartFile file) throws IOException {
-        if (cloudinary == null) {
-            throw new IllegalStateException("Cloudinary service not initialized.");
-        }
         return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
     }
 

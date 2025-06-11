@@ -23,8 +23,12 @@ import com.urbaniza.authapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +40,7 @@ public class ReportService {
     private final StatusTypeRepository statusTypeRepository;
     private final DepartmentRepository departmentRepository;
     private final StatusHistoryRepository statusHistoryRepository;
+    private final CloudinaryService cloudinaryService;
 
     private static final String INITIAL_STATUS_NAME = "Novo";
 
@@ -45,19 +50,21 @@ public class ReportService {
                          SegmentRepository segmentRepository,
                          StatusTypeRepository statusTypeRepository,
                          DepartmentRepository departmentRepository,
-                         StatusHistoryRepository statusHistoryRepository) {
+                         StatusHistoryRepository statusHistoryRepository,
+                         CloudinaryService cloudinaryService) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.segmentRepository = segmentRepository;
         this.statusTypeRepository = statusTypeRepository;
         this.departmentRepository = departmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
-    public ResponseReportDTO createReport(CreateReportRequestDTO createRequestDTO, String authenticatedUserEmail) {
-        User citizen = userRepository.findByEmail(authenticatedUserEmail)
-            .orElseThrow(() -> new ResourceNotFoundException("User citizen not founded with email: " + authenticatedUserEmail));
+    public ResponseReportDTO createReport(CreateReportRequestDTO createRequestDTO,MultipartFile photoFile, User authenticatedUser) throws IOException {
+        User citizen = userRepository.findByEmail(authenticatedUser.getEmail())
+            .orElseThrow(() -> new ResourceNotFoundException("User citizen not founded with email: " + authenticatedUser.getEmail()));
 
         // Security check
         if (citizen.getRole() != UserRole.CITIZEN) {
@@ -77,11 +84,18 @@ public class ReportService {
         report.setLatitude(createRequestDTO.getLatitude());
         report.setLongitude(createRequestDTO.getLongitude());
         report.setAnonymous(createRequestDTO.isAnonymous() != null ? createRequestDTO.isAnonymous() : false);
-        report.setPhotoUrl(createRequestDTO.getPhotoUrl());
-        report.setPhotoPublicId(createRequestDTO.getPhotoPublicId());
         report.setUser(citizen);
         report.setSegment(segment);
         report.setStatus(initialStatus);
+
+        if (photoFile != null && !photoFile.isEmpty()) {
+            if (cloudinaryService == null) {
+                throw new ResourceNotFoundException("Cloudinary service is not configured but a photo was provided.");
+            }
+            Map uploadResult = cloudinaryService.uploadImage(photoFile);
+            report.setPhotoUrl(uploadResult.get("url").toString());
+            report.setPhotoPublicId(uploadResult.get("public_id").toString());
+        }
 
         Report savedReport = reportRepository.save(report);
         createStatusHistoryEntry(savedReport, initialStatus, initialStatus, citizen);
