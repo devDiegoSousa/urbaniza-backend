@@ -8,12 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.annotation.PostConstruct;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class CloudinaryService {
 
-    private Cloudinary cloudinary = null; // Inicializa com null
+    private Cloudinary cloudinary;
 
     @Value("${cloudinary.cloud-name}")
     private String cloudName;
@@ -32,8 +33,11 @@ public class CloudinaryService {
                 "api_secret", apiSecret));
     }
 
-    public Map uploadImage(MultipartFile file) throws IOException {
-        return cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+    public Map uploadImage(MultipartFile file, String folderName) throws IOException {
+        Map<String, Object> options = new HashMap<>();
+        options.put("folder", folderName);
+
+        return cloudinary.uploader().upload(file.getBytes(), options);
     }
 
     public Map deleteImage(String publicId) throws IOException {

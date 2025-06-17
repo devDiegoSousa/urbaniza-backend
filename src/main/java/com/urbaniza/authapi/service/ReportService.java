@@ -92,7 +92,7 @@ public class ReportService {
             if (cloudinaryService == null) {
                 throw new ResourceNotFoundException("Cloudinary service is not configured but a photo was provided.");
             }
-            Map uploadResult = cloudinaryService.uploadImage(photoFile);
+            Map uploadResult = cloudinaryService.uploadImage(photoFile, "reports");
             report.setPhotoUrl(uploadResult.get("url").toString());
             report.setPhotoPublicId(uploadResult.get("public_id").toString());
         }

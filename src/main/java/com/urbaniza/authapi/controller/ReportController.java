@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reports")
+@RequestMapping("/api/v1/report")
 public class ReportController {
 
     private final ReportService reportService;
@@ -37,7 +37,7 @@ public class ReportController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('CITIZEN')")
     public ResponseEntity<ResponseReportDTO> createReport(
-        @RequestPart(value = "report") CreateReportRequestDTO createRequestDTO,
+        @Valid @RequestPart(value = "report") CreateReportRequestDTO createRequestDTO,
         @RequestPart(value = "photo", required = false) MultipartFile photo,
         @AuthenticationPrincipal User authenticatedUser) {
 
