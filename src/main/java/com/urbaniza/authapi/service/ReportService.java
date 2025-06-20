@@ -151,26 +151,19 @@ public class ReportService {
         Department department = departmentRepository.findById(departmentUser.getDepartmentId())
             .orElseThrow(() -> new ResourceNotFoundException("Department not found for user: " + departmentUser));
 
-        // Search for a reports by id and department
         Report report = reportRepository.findByIdAndDepartment(reportId, department)
             .orElseThrow(() -> new ResourceNotFoundException("Report with Id " + reportId + " not found or does not belong to this department."));
 
-        // Save old status
         StatusType oldStatus = report.getStatus();
-        // Search new status by id
         StatusType newStatus = statusTypeRepository.findById(statusUpdateDTO.getNewStatusId())
             .orElseThrow(() -> new ResourceNotFoundException("New status type not found with ID: " + statusUpdateDTO.getNewStatusId()));
 
-        // If old status is same as new status: ERROR
         if (oldStatus.getId().equals(newStatus.getId())) {
             throw new InvalidInputException("The report already has the status '" + newStatus.getName() + "'. No changes made.");
         }
 
-        // Set the new status for the report
         report.setStatus(newStatus);
-        // Save updated report
         Report updatedReport = reportRepository.save(report);
-        // Create a status history entry
         createStatusHistoryEntry(updatedReport, newStatus, oldStatus, departmentUser);
         return convertToResponseReportDTO(updatedReport);
     }
