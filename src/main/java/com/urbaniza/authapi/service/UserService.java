@@ -2,6 +2,7 @@ package com.urbaniza.authapi.service;
 
 import com.urbaniza.authapi.dto.user.UpdateProfileRequestDTO;
 import com.urbaniza.authapi.dto.user.UpdateProfileResponseDTO;
+import com.urbaniza.authapi.dto.user.ViewProfileResponseDTO;
 import com.urbaniza.authapi.exception.InvalidInputException;
 import com.urbaniza.authapi.exception.ResourceNotFoundException;
 import com.urbaniza.authapi.model.User;
@@ -11,12 +12,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
   @Autowired
   UserRepository userRepository;
+
+  public ViewProfileResponseDTO viewProfile(String authenticatedUserEmail) {
+    Optional<User> user = userRepository.findByEmail(authenticatedUserEmail);
+
+    if(user.isEmpty()) {
+      throw new ResourceNotFoundException("User not found with email: " + authenticatedUserEmail);
+    }
+
+    ViewProfileResponseDTO profile = new ViewProfileResponseDTO();
+
+    profile.setFirstName(user.get().getFirstName());
+    profile.setLastName(user.get().getLastName());
+    profile.setEmail(user.get().getEmail());
+
+    return profile;
+  }
 
   @Transactional
   public UpdateProfileResponseDTO updateProfile(UpdateProfileRequestDTO editProfileDTO, String authenticatedUserEmail){
