@@ -54,6 +54,7 @@ public class DepartmentUsersInitializer implements CommandLineRunner {
         departmentUser.setEmail(departmentEmail);
         departmentUser.setPassword(passwordEncoder.encode(defaultPassword));
         departmentUser.setRole(UserRole.DEPARTMENT);
+        departmentUser.setEmailConfirmed(true);
         departmentUser.setDepartmentId(department.getId());
 
         userRepository.save(departmentUser);
