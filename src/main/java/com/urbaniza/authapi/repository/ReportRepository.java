@@ -4,6 +4,8 @@ import com.urbaniza.authapi.enums.ReportStatus;
 import com.urbaniza.authapi.model.Department;
 import com.urbaniza.authapi.model.Report;
 import com.urbaniza.authapi.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,11 @@ import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
+    @Query("SELECT r FROM Report r WHERE r.segment.department = :department")
+    Page<Report> findByDepartmentPaginated(
+            @Param("department") Department department,
+            Pageable pageable
+    );
 
     // Searches for all reports created by a specific user.
     @Query("SELECT r FROM Report r WHERE r.user = :user ORDER BY r.createdAt DESC")

@@ -21,6 +21,10 @@ import com.urbaniza.authapi.repository.StatusHistoryRepository;
 import com.urbaniza.authapi.repository.StatusTypeRepository;
 import com.urbaniza.authapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,6 +63,35 @@ public class ReportService {
         this.departmentRepository = departmentRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ResponseReportDTO> getReportsForDepartmentPaginated(
+            String authenticatedUserEmail,
+            int page,
+            int size,
+            String sort
+    ) {
+        // Validaão do usuário/departamento (igual ao método existente)
+        User departmentUser = userRepository.findByEmail(authenticatedUserEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário de departamento não encontradi"));
+
+        Department department = departmentRepository.findByEmail(departmentUser.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Departamento não encontrado"));
+
+
+        // Configuração da paginação e ordenação
+        Pageable pageable = PageRequest.of(
+                page - 1,  // Se quiser página 1 como início (Spring inicia em 0)
+                size,
+                Sort.by(sort)  // Ex: "title" ou "title,asc"
+        );
+
+        // Busca paginada
+        Page<Report> reportsPage = reportRepository.findByDepartmentPaginated(department, pageable);
+
+        // Converte para DTO
+        return reportsPage.map(this::convertToResponseReportDTO);
     }
 
     @Transactional

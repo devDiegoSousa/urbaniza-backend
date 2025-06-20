@@ -7,6 +7,7 @@ import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.service.ReportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -97,5 +98,22 @@ public class ReportController {
 
         ResponseReportDTO updatedReport = reportService.updateReportStatus(reportId, statusUpdateDTO, authenticatedUser.getEmail());
         return ResponseEntity.ok(updatedReport);
+    }
+
+    @GetMapping("/department/paginated")
+    @PreAuthorize("hasRole('DEPARTMENT')")
+    public ResponseEntity<Page<ResponseReportDTO>> getDepartmentRepostsPaginated(
+            @AuthenticationPrincipal User authenticatedUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "title,asc") String sort
+    ) {
+        Page<ResponseReportDTO> reports = reportService.getReportsForDepartmentPaginated(
+                authenticatedUser.getEmail(),
+                page,
+                size,
+                sort
+        );
+        return ResponseEntity.ok(reports);
     }
 }
