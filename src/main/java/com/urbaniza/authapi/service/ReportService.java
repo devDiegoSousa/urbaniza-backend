@@ -67,24 +67,26 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public Page<ResponseReportDTO> getReportsForDepartmentPaginated(
-            String authenticatedUserEmail,
+            User authenticatedUser,
             int page,
             int size,
-            String sort
+            String sort,
+            String direction
     ) {
         // Validaão do usuário/departamento (igual ao método existente)
-        User departmentUser = userRepository.findByEmail(authenticatedUserEmail)
+        User departmentUser = userRepository.findByEmail(authenticatedUser.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário de departamento não encontradi"));
 
-        Department department = departmentRepository.findByEmail(departmentUser.getEmail())
+        Department department = departmentRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Departamento não encontrado"));
 
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction); // Criou a variável
 
         // Configuração da paginação e ordenação
         Pageable pageable = PageRequest.of(
                 page - 1,  // Se quiser página 1 como início (Spring inicia em 0)
                 size,
-                Sort.by(sort)  // Ex: "title" ou "title,asc"
+                Sort.by(sortDirection, sort) // Ordenação segura
         );
 
         // Busca paginada

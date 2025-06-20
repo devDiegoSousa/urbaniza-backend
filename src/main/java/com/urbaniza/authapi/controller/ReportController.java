@@ -8,6 +8,7 @@ import com.urbaniza.authapi.service.ReportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -106,13 +107,16 @@ public class ReportController {
             @AuthenticationPrincipal User authenticatedUser,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "8") int size,
-            @RequestParam(defaultValue = "title,asc") String sort
+            @RequestParam(defaultValue = "title") String sort,
+            @RequestParam(defaultValue = "asc") String direction
     ) {
+
         Page<ResponseReportDTO> reports = reportService.getReportsForDepartmentPaginated(
-                authenticatedUser.getEmail(),
+                authenticatedUser,
                 page,
                 size,
-                sort
+                sort,
+                direction
         );
         return ResponseEntity.ok(reports);
     }
