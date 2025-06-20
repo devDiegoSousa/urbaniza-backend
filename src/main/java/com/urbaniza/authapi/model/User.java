@@ -56,10 +56,17 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(name = "departmentId", nullable = true)
+    private Long departmentId;
+
     @PrePersist
     protected void onCreate() {
         if (this.role == null) {
             this.role = UserRole.CITIZEN;
+        }
+
+        if(this.role == UserRole.DEPARTMENT && this.departmentId == null){
+            throw new IllegalStateException("departmentId is required for municipal department employees.");
         }
     }
 
@@ -77,45 +84,32 @@ public class User implements UserDetails {
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    public String getFirstName() {return firstName;}
+    public void setFirstName(String firstName) {this.firstName = firstName;}
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public String getLastName() {return lastName;}
+    public void setLastName(String lastName) {this.lastName = lastName;}
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    public UserRole getRole() {return role;}
+    public void setRole(UserRole role) {this.role = role;}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+    public Long getDepartmentId() {return departmentId;}
+    public void setDepartmentId(Long departmentId) {this.departmentId = departmentId;}
 
+    @Override
+    public String getUsername() {return email;}
     @Override
     public boolean isAccountNonExpired() { return true; }
     @Override
@@ -124,4 +118,6 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
     @Override
     public boolean isEnabled() { return true; }
+
+
 }

@@ -65,10 +65,12 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup",
-                                "/auth/signin",
-                                "/auth/confirm-email",
-                                "/auth/refresh-token").permitAll()
+                        .requestMatchers(
+                            "/auth/signup",
+                            "/auth/signin",
+                            "/auth/confirm-email",
+                            "/auth/refresh-token",
+                            "/error").permitAll()
                         .requestMatchers("/citizen/**").hasRole("CITIZEN")
                         .requestMatchers("/department/**").hasRole("DEPARTMENT")
                         .anyRequest().authenticated()

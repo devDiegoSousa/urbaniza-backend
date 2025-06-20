@@ -43,13 +43,13 @@ public class AdminInitializer implements CommandLineRunner {
       admin.setEmail(adminEmail);
       admin.setPassword(passwordEncoder.encode(adminPassword));
       admin.setFirstName("Admin");
-      admin.setLastName("Urbanize");
+      admin.setLastName("Urbaniza");
       admin.setRole(UserRole.ADMIN);
 
       userRepository.save(admin);
 
     } catch (Exception e) {
-      System.out.println("Erro ao criar o admin:");
+      System.out.println("admin user not created:");
       e.printStackTrace();
     }
   }

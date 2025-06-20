@@ -100,10 +100,20 @@ public class JwtUtils {
       userId = ((com.urbaniza.authapi.model.User) userDetails).getId();
     }
 
+    Long departmentId = null;
+    if (userDetails instanceof com.urbaniza.authapi.model.User) {
+      com.urbaniza.authapi.model.User user = (com.urbaniza.authapi.model.User) userDetails;
+      if (user.getDepartmentId() != null) {
+        departmentId = user.getDepartmentId();
+      }
+    }
+
+
     return Jwts.builder()
       .setSubject(userDetails.getUsername())
       .claim("role", role)
       .claim("userId", userId)
+      .claim("departmentId", departmentId)
       .setIssuedAt(new Date())
       .setExpiration(new Date(System.currentTimeMillis() + jwtAccessExpirationMs))
       .signWith(this.key, SignatureAlgorithm.HS512)

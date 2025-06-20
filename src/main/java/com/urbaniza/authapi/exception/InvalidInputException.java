@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * }
  * }</pre>
  */
-@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
 public class InvalidInputException extends RuntimeException {
   public InvalidInputException(String message) {
     super(message);
