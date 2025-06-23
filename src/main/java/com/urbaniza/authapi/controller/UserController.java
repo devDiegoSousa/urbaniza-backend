@@ -1,5 +1,6 @@
 package com.urbaniza.authapi.controller;
 
+import com.urbaniza.authapi.dto.user.DeleteUserRequestDTO;
 import com.urbaniza.authapi.dto.user.UpdateProfileRequestDTO;
 import com.urbaniza.authapi.dto.user.UpdateProfileResponseDTO;
 import com.urbaniza.authapi.dto.user.ViewProfileResponseDTO;
@@ -35,6 +36,16 @@ public class UserController {
 
     UpdateProfileResponseDTO updatedProfile = userService.updateProfile(updateProfileRequestDTO, authenticatedUser.getEmail());
     return ResponseEntity.ok(updatedProfile);
+  }
+
+  @DeleteMapping("/delete")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<?> deleteUser(
+      @Valid @RequestBody DeleteUserRequestDTO deleteUserDTO,
+      @AuthenticationPrincipal User authenticatedUser) {
+
+    userService.deleteUser(deleteUserDTO, authenticatedUser.getEmail());
+    return  ResponseEntity.ok("user permanently deleted");
   }
 
 }

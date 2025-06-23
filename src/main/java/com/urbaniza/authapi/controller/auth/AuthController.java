@@ -62,6 +62,7 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             String accessToken = jwtUtils.generateAccessToken(userDetails);
+            String role = jwtUtils.getRoleFromJwtToken(accessToken);
 
             String refreshToken = jwtUtils.generateRefreshToken(userDetails);
             Date expiration = jwtUtils.getExpirationDateFromToken(accessToken);
@@ -70,6 +71,7 @@ public class AuthController {
             response.setAccessToken(accessToken);
             response.setRefreshToken(refreshToken);
             response.setExpTime(expiration.getTime());
+            response.setRole(role);
 
             return ResponseEntity.ok(response);
         } catch (UsernameNotFoundException e) {

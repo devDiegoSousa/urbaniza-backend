@@ -13,13 +13,15 @@ public class SigninResponseDTO {
     @NotNull(message = "Expiration time is required")
     private Long expTime;
 
-    public SigninResponseDTO() {
-    }
+    @NotBlank(message = "Role is required")
+    private String role;
 
-    public SigninResponseDTO(String accessToken,String refreshToken, Long expTime) {
+    public SigninResponseDTO() {}
+    public SigninResponseDTO(String accessToken,String refreshToken, Long expTime, String role) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expTime = expTime;
+        this.role = role;
     }
 
     public String getAccessToken() {
@@ -41,5 +43,12 @@ public class SigninResponseDTO {
     }
     public void setExpTime(Long expTime) {
         this.expTime = expTime;
+    }
+
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
+        this.role = role;
     }
 }

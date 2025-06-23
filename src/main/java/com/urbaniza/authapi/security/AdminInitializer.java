@@ -33,6 +33,8 @@ public class AdminInitializer implements CommandLineRunner {
   @Override
   public void run(String... args) {
     try {
+      System.out.println("[INFO] Starting to create ADMIN user for testing");
+
 
       Optional<User> found = userRepository.findByEmail(adminEmail);
       if (found.isPresent()) {
@@ -47,6 +49,7 @@ public class AdminInitializer implements CommandLineRunner {
       admin.setRole(UserRole.ADMIN);
 
       userRepository.save(admin);
+      System.out.println("[INFO] End to create ADMIN user for testing");
 
     } catch (Exception e) {
       System.out.println("admin user not created:");

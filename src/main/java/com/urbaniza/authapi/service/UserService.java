@@ -1,5 +1,6 @@
 package com.urbaniza.authapi.service;
 
+import com.urbaniza.authapi.dto.user.DeleteUserRequestDTO;
 import com.urbaniza.authapi.dto.user.UpdateProfileRequestDTO;
 import com.urbaniza.authapi.dto.user.UpdateProfileResponseDTO;
 import com.urbaniza.authapi.dto.user.ViewProfileResponseDTO;
@@ -9,6 +10,7 @@ import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -19,6 +21,8 @@ public class UserService {
 
   @Autowired
   UserRepository userRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   public ViewProfileResponseDTO viewProfile(String authenticatedUserEmail) {
     Optional<User> user = userRepository.findByEmail(authenticatedUserEmail);
@@ -56,6 +60,21 @@ public class UserService {
 
     User updatedUser = userRepository.save(userToUpdate);
     return convertToEditProfileResponseDTO(updatedUser);
+  }
+
+  @Transactional
+  public void  deleteUser(DeleteUserRequestDTO deleteUserDTO, String authenticatedUserEmail) {
+    Optional<User> userFound = userRepository.findByEmail(authenticatedUserEmail);
+
+    if(userFound.isEmpty()){
+      throw new ResourceNotFoundException("User not found with email: " + authenticatedUserEmail);
+    }
+
+    if (!passwordEncoder.matches(deleteUserDTO.getPassword(), userFound.get().getPassword())) {
+      throw new IllegalArgumentException("Unable to delete user.");
+    }
+
+    userRepository.deleteByEmail(authenticatedUserEmail);
   }
 
   private UpdateProfileResponseDTO convertToEditProfileResponseDTO(User user) {

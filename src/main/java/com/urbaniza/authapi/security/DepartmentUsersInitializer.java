@@ -64,7 +64,7 @@ public class DepartmentUsersInitializer implements CommandLineRunner {
       e.printStackTrace();
     }
 
-    System.out.println("[INFO] Starting to create DEPARTMENT users for testing");
+    System.out.println("[INFO] End to create DEPARTMENT users for testing");
 
   }
 }
