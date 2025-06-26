@@ -11,8 +11,6 @@ Siga os passos abaixo para clonar, configurar e executar o projeto em seu ambien
 ### ✅ Pré-requisitos
 
 - [Git](https://git-scm.com/)
-- [Java 17+](https://www.oracle.com/br/java/technologies/javase/jdk17-archive-downloads.html)
-- [Maven](https://maven.apache.org/)
 - [Docker e Docker Compose](https://docs.docker.com/get-docker/)
 - Uma IDE compatível com Java (ex: IntelliJ IDEA, Eclipse, VS Code)
 
@@ -25,30 +23,14 @@ Siga os passos abaixo para clonar, configurar e executar o projeto em seu ambien
 > cd urbaniza-backend
 ```
 
-### 🔧 Preparando o projeto Java
-
-1. Abra o projeto clonado em sua IDE de preferência.
-2. No terminal da IDE ou do sistema, execute os seguintes comandos:
-
-```
-# Limpa dependências e builds anteriores
-> mvn clean
-```
-``` 
-# Compila o projeto e gera o .jar (pulando os testes)
->mvn package -DskipTests
-```
-ou utilize somente:
-```
-> mvn clean package -DskipTests
-```
-
 ### 🐳 Subindo os containers com Docker
-
-Com a aplicação empacotada, execute o comando abaixo para iniciar o banco de dados, pgAdmin e o backend da aplicação:
+1. Abra o Docker
+2. Acesse o terminal Docker
+3. Acesse dentro do terminal a pasta raiz do projeto (Repositório clonado)
+4. Utilize o seguinte comando:
 
 ```
-> docker-compose up --build
+> docker compose up
 ```
 
 Isso criará e iniciará os containers para:
@@ -85,15 +67,19 @@ Cria o registro de um novo usuário no banco de dados
 ```
 {
     "email": "teste@urbaniza.com",
-    "password": "testes",
+    "password": "senhacom6caracteres",
     "firstName": "usuário",
     "lastName": "teste",
-    "role": "DEPARTMENT"(DEPARTMENT ou CITIZEN)
 }
 ```
 ##### Response Body example:
 
     Usuário registrado com sucesso.
+
+##### Validação de email
+1. Abra seu email
+2. Procure o email enviado por nicolasalcantaradev@gmail.com
+3. Acesse o link para validar o email
 
 #### POST `/auth/signin`
 Autentica um usuário e retorna o token JWT.
@@ -122,7 +108,7 @@ Utiliza o refreshToken para criar um novo accessToken
 
 ```
 {
-  "refreshToken": "insira um token válido"
+  "refreshToken": "eyJhb..."
 }
 ```
 
@@ -131,6 +117,8 @@ Você pode usar ferramentas como Postman ou Insomnia para interagir com a API, e
 
 ## 🧹 Encerrando os containers
 Para parar a aplicação e remover os containers:
+
+1. Dentro da pasta raiz do projeto dentro do terminal Docker, utilize o comando a seguir:
 ```
 docker-compose down
 ```
