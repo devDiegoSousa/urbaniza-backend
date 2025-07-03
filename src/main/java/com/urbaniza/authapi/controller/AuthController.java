@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.controller.auth;
+package com.urbaniza.authapi.controller;
 
 import com.urbaniza.authapi.dto.auth.refresh.RefreshTokenResponseDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")

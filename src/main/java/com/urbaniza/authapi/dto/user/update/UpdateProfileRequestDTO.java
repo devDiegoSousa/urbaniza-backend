@@ -1,4 +1,4 @@
-package com.urbaniza.authapi.dto.user;
+package com.urbaniza.authapi.dto.user.update;
 
 public class UpdateProfileRequestDTO {
 

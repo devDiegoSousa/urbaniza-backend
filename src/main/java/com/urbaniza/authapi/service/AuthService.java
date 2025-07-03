@@ -35,7 +35,7 @@ public class AuthService {
         Optional<User> userFound = userRepository.findByEmail(signupRequestDTO.getEmail());
         if (userFound.isPresent()) {throw new Exception("Email já existe");}
 
-        String confirmationToken = jwtUtils.generateConfirmEmailToken(signupRequestDTO);
+        String confirmationToken = jwtUtils.generateConfirmEmailToken(signupRequestDTO.getEmail());
 
         User user = new User();
         user.setConfirmationToken(confirmationToken);

@@ -1,13 +1,15 @@
 package com.urbaniza.authapi.service;
 
-import com.urbaniza.authapi.dto.user.DeleteUserRequestDTO;
-import com.urbaniza.authapi.dto.user.UpdateProfileRequestDTO;
-import com.urbaniza.authapi.dto.user.UpdateProfileResponseDTO;
-import com.urbaniza.authapi.dto.user.ViewProfileResponseDTO;
+import com.urbaniza.authapi.dto.user.*;
+import com.urbaniza.authapi.dto.user.update.UpdateEmailRequestDTO;
+import com.urbaniza.authapi.dto.user.update.UpdatePasswordRequestDTO;
+import com.urbaniza.authapi.dto.user.update.UpdateProfileRequestDTO;
+import com.urbaniza.authapi.dto.user.update.UpdateProfileResponseDTO;
 import com.urbaniza.authapi.exception.InvalidInputException;
 import com.urbaniza.authapi.exception.ResourceNotFoundException;
 import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.repository.UserRepository;
+import com.urbaniza.authapi.util.JwtUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,10 @@ public class UserService {
 
   @Autowired
   UserRepository userRepository;
+  @Autowired
+  EmailService emailService;
+  @Autowired
+  JwtUtils jwtUtils;
   @Autowired
   private PasswordEncoder passwordEncoder;
 
@@ -60,6 +66,46 @@ public class UserService {
 
     User updatedUser = userRepository.save(userToUpdate);
     return convertToEditProfileResponseDTO(updatedUser);
+  }
+
+  @Transactional
+  public void updateEmail(UpdateEmailRequestDTO updateEmailRequestDTO, String authenticatedUserEmail){
+    User userFound = userRepository.findByEmail(authenticatedUserEmail).
+            orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + authenticatedUserEmail));
+
+    if(updateEmailRequestDTO.getEmail() == userFound.getEmail()){
+      throw new InvalidInputException("You already use this email");
+    }
+
+    if(userRepository.existsByEmail(updateEmailRequestDTO.getEmail())) {
+      throw new InvalidInputException("Email already in use");
+    }
+
+    String confirmationToken = jwtUtils.generateConfirmEmailToken(updateEmailRequestDTO.getEmail());
+
+    userFound.setConfirmationToken(confirmationToken);
+    userFound.setEmailConfirmed(false);
+
+    emailService.sendConfirmationEmail(updateEmailRequestDTO.getEmail(), confirmationToken);
+
+    userFound.setEmail(updateEmailRequestDTO.getEmail());
+
+    User updatedUser = userRepository.save(userFound);
+  }
+
+  @Transactional
+  public void updatePassword(UpdatePasswordRequestDTO updatePasswordRequestDTO, String authenticatedUserEmail) {
+    User userFound = userRepository.findByEmail(authenticatedUserEmail).
+            orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + authenticatedUserEmail));
+
+    if(userFound.getPassword() == updatePasswordRequestDTO.getNewPassowrd()){
+      throw new InvalidInputException("Password already in use");
+    };
+
+    User updatedUser = userFound;
+    updatedUser.setPassword(updatePasswordRequestDTO.getPassword());
+
+    userRepository.save(updatedUser);
   }
 
   @Transactional

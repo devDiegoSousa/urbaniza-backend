@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,8 @@ public class JwtUtils {
   private int jwtAccessExpirationMs;
   @Value("${urbaniza.app.jwtRefreshExpirationMs}")
   private int jwtRefreshExpirationMs;
+  @Autowired
+  SignupRequestDTO signupRequestDTO;
 
   private Key key;
 
@@ -129,7 +132,7 @@ public class JwtUtils {
       .compact();
   }
 
-  public String generateConfirmEmailToken(SignupRequestDTO signupRequestDTO) {
+  public String generateConfirmEmailToken(String email) {
     long twoHundredYearsInMillis = 6311520000000L;
 
     return Jwts.builder()
