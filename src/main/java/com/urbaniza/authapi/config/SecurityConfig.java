@@ -70,6 +70,7 @@ public class SecurityConfig {
                             "/auth/signin",
                             "/auth/confirm-email",
                             "/auth/refresh-token",
+                            "/auth/logout",
                             "/error").permitAll()
                         .requestMatchers("/citizen/**").hasRole("CITIZEN")
                         .requestMatchers("/department/**").hasRole("DEPARTMENT")
