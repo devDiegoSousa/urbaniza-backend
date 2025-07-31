@@ -131,11 +131,11 @@ public class JwtUtils {
       .compact();
   }
 
-  public String generateConfirmEmailToken(String email) {
+  public String generateConfirmEmailToken(String emailToConfirm) {
     long twoHundredYearsInMillis = 6311520000000L;
 
     return Jwts.builder()
-        .setSubject(email)
+        .setSubject(emailToConfirm)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + twoHundredYearsInMillis))
         .signWith(this.key, SignatureAlgorithm.HS512)

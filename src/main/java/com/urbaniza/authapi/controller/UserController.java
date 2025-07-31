@@ -8,6 +8,7 @@ import com.urbaniza.authapi.dto.user.update.UpdateProfileResponseDTO;
 import com.urbaniza.authapi.model.User;
 import com.urbaniza.authapi.service.EmailService;
 import com.urbaniza.authapi.service.UserService;
+import com.urbaniza.authapi.util.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,8 @@ public class UserController {
   UserService userService;
   @Autowired
   EmailService emailService;
+  @Autowired
+  JwtUtils jwtUtils;
 
   @GetMapping("/profile")
   @PreAuthorize("isAuthenticated()")

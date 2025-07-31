@@ -11,7 +11,10 @@ import com.urbaniza.authapi.util.JwtUtils;
 import com.urbaniza.authapi.service.AuthService;
 import com.urbaniza.authapi.service.EmailService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +42,8 @@ public class AuthController {
     private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
+    @Value("${urbaniza.app.jwtRefreshExpirationMs}")
+    long refreshTokenExpirationMs;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
@@ -51,7 +56,9 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signin(@Valid @RequestBody SigninRequestDTO signinRequest) {
+    public ResponseEntity<?> signin(
+        @Valid @RequestBody SigninRequestDTO signinRequest,
+        HttpServletResponse httpResponse) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(signinRequest.getEmail(), signinRequest.getPassword())
@@ -61,53 +68,71 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             String accessToken = jwtUtils.generateAccessToken(userDetails);
-            String role = jwtUtils.getRoleFromJwtToken(accessToken);
+            Date expiration = jwtUtils.getExpirationDateFromToken(accessToken);
 
             String refreshToken = jwtUtils.generateRefreshToken(userDetails);
-            Date expiration = jwtUtils.getExpirationDateFromToken(accessToken);
+
 
             SigninResponseDTO response = new SigninResponseDTO();
             response.setAccessToken(accessToken);
-            response.setRefreshToken(refreshToken);
             response.setExpTime(expiration.getTime());
-            response.setRole(role);
 
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false); //// Em produção, mude para true (requer HTTPS)
+            refreshTokenCookie.setPath("/auth");
+            refreshTokenCookie.setMaxAge((int) (refreshTokenExpirationMs / 1000));
+            // refreshTokenCookie.setSameSite("Strict");
+
+            httpResponse.addCookie(refreshTokenCookie);
             return ResponseEntity.ok(response);
         } catch (UsernameNotFoundException e) {
             if (e.getMessage().contains("Confirme seu email")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Verifique seu email e confirme sua conta");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Verifique seu email e confirme sua conta");
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
     }
 
-    @GetMapping("/confirm-email")
+    @GetMapping("/email/confirm")
     public ResponseEntity<?> confirmEmail(@RequestParam String token) {
         try {
             User user = userRepository.findByConfirmationToken(token)
-                    .orElseThrow(() -> new RuntimeException("Token inválido"));
+                    .orElseThrow(() -> new RuntimeException("Invalid token"));
 
             user.setEmailConfirmed(true);
-            user.setConfirmationToken(null); // Invalida o token após uso
+            user.setConfirmationToken(null);
             userRepository.save(user);
 
-            return ResponseEntity.ok("Email confirmado com sucesso!");
+            return ResponseEntity.ok("Email confirmed successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro ao confirmar email: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error confirming email: " + e.getMessage());
         }
     }
 
+
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok("Logout realizado com sucesso.");
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie refreshTokenCookieDelete = new Cookie("refreshToken", null);
+        refreshTokenCookieDelete.setMaxAge(0);
+        refreshTokenCookieDelete.setHttpOnly(true);
+        refreshTokenCookieDelete.setPath("/auth");
+        // refreshTokenCookieDelete.setSecure(true); // In prod
+        // refreshTokenCookieDelete.setSameSite("Strict");
+
+        response.addCookie(refreshTokenCookieDelete);
+
+        return ResponseEntity.ok("");
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDTO request) {
-        String refreshToken = request.getRefreshToken();
+    public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("token não autorizado");
+        }
 
         if (!jwtUtils.validateJwtToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token inválido ou expirado.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("token não autorizado");
         }
 
         String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
