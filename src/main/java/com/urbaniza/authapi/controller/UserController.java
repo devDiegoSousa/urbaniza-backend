@@ -1,11 +1,10 @@
 package com.urbaniza.authapi.controller;
 
-import com.urbaniza.authapi.dto.user.DeleteUserRequestDTO;
-import com.urbaniza.authapi.dto.user.UpdateProfileRequestDTO;
-import com.urbaniza.authapi.dto.user.UpdateProfileResponseDTO;
-import com.urbaniza.authapi.dto.user.ViewProfileResponseDTO;
+import com.urbaniza.authapi.dto.user.*;
 import com.urbaniza.authapi.model.User;
+import com.urbaniza.authapi.service.EmailService;
 import com.urbaniza.authapi.service.UserService;
+import com.urbaniza.authapi.util.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,10 @@ public class UserController {
 
   @Autowired
   UserService userService;
+  @Autowired
+  EmailService emailService;
+  @Autowired
+  JwtUtils jwtUtils;
 
   @GetMapping("/profile")
   @PreAuthorize("isAuthenticated()")
@@ -36,6 +39,20 @@ public class UserController {
 
     UpdateProfileResponseDTO updatedProfile = userService.updateProfile(updateProfileRequestDTO, authenticatedUser.getEmail());
     return ResponseEntity.ok(updatedProfile);
+  }
+
+  @PutMapping("/profile/update/email")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<?> updateEmail(
+      @Valid @RequestBody UpdateEmailRequestDTO updateEmailRequestDTO,
+      @AuthenticationPrincipal User authenticatedUser ) {
+
+    String email = updateEmailRequestDTO.getEmail();
+
+    String confirmationToken = jwtUtils.generateConfirmEmailToken(email);
+
+    emailService.sendConfirmationEmail(updateEmailRequestDTO.getEmail(), confirmationToken);
+    return ResponseEntity.ok("email sent successfully: Confirm your email");
   }
 
   @DeleteMapping("/delete")
