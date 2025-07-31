@@ -9,17 +9,17 @@ public class UpdatePasswordRequestDTO {
     String password;
     @NotBlank
     @Size(min = 6)
-    String newPassowrd;
+    String newPassword;
 
     public UpdatePasswordRequestDTO() {}
-    public UpdatePasswordRequestDTO(String password, String newPassowrd) {
+    public UpdatePasswordRequestDTO(String password, String newPassword) {
         this.password = password;
-        this.newPassowrd = newPassowrd;
+        this.newPassword = newPassword;
     }
 
     public String getPassword() {return password;}
     public void setPassword(String password) {this.password = password;}
 
-    public String getNewPassowrd() {return newPassowrd;}
-    public void setNewPassowrd(String newPassowrd) {this.newPassowrd = newPassowrd;}
+    public String getNewPassword() {return newPassword;}
+    public void setNewPassword(String newPassword) {this.newPassword = newPassword;}
 }

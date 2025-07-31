@@ -1,6 +1,6 @@
 package com.urbaniza.authapi.util;
 
-import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
+
 import com.urbaniza.authapi.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Random;
 import java.util.function.Function;
 
 @Component
@@ -28,8 +29,6 @@ public class JwtUtils {
   private int jwtAccessExpirationMs;
   @Value("${urbaniza.app.jwtRefreshExpirationMs}")
   private int jwtRefreshExpirationMs;
-  @Autowired
-  SignupRequestDTO signupRequestDTO;
 
   private Key key;
 
@@ -136,11 +135,22 @@ public class JwtUtils {
     long twoHundredYearsInMillis = 6311520000000L;
 
     return Jwts.builder()
-        .setSubject(signupRequestDTO.getEmail())
+        .setSubject(email)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + twoHundredYearsInMillis))
         .signWith(this.key, SignatureAlgorithm.HS512)
         .compact();
+  }
+
+  public String generatePasswordRecoveryToken(String random) {
+    long fiveMinutesInMillis = 300000L;
+
+    return Jwts.builder()
+            .setSubject(random)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + fiveMinutesInMillis))
+            .signWith(this.key, SignatureAlgorithm.HS512)
+            .compact();
   }
 
   // Checks if the JWT token is expired.
@@ -156,3 +166,4 @@ public class JwtUtils {
 
   }
 }
+

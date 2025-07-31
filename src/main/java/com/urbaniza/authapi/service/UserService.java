@@ -98,12 +98,12 @@ public class UserService {
     User userFound = userRepository.findByEmail(authenticatedUserEmail).
             orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + authenticatedUserEmail));
 
-    if(userFound.getPassword() == updatePasswordRequestDTO.getNewPassowrd()){
+    if(userFound.getPassword() == updatePasswordRequestDTO.getNewPassword()){
       throw new InvalidInputException("Password already in use");
     };
 
     User updatedUser = userFound;
-    updatedUser.setPassword(updatePasswordRequestDTO.getPassword());
+    updatedUser.setPassword(passwordEncoder.encode(updatePasswordRequestDTO.getNewPassword()));
 
     userRepository.save(updatedUser);
   }
