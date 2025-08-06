@@ -3,7 +3,7 @@ package com.urbaniza.authapi.service;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
+import com.urbaniza.authapi.dto.auth.signin.SigninReturnDTO;
 import com.urbaniza.authapi.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,29 +51,24 @@ public class AuthService {
         emailService.sendConfirmationEmail(user.getEmail(), confirmationToken);
     }
 
-    public SigninResponseDTO signin(SigninRequestDTO signinRequestDTO) {
+    public SigninReturnDTO signin(SigninRequestDTO signinRequestDTO) {
         Optional<User> userFound = userRepository.findByEmail(signinRequestDTO.getEmail());
         if (userFound.isPresent() && passwordEncoder.matches(signinRequestDTO.getPassword(), userFound.get().getPassword())) {
+            User user = userFound.get();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    signinRequestDTO.getEmail(), null, userFound.get().getAuthorities());
+                    user, null, user.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-            String accessToken = jwtUtils.generateAccessToken(userDetails);
-            String refreshToken = jwtUtils.generateRefreshToken(userDetails);
+            String accessToken = jwtUtils.generateAccessToken(user);
+            String refreshToken = jwtUtils.generateRefreshToken(user);
             long expTime = jwtUtils.getExpirationDateFromToken(accessToken).getTime();
 
-            SigninResponseDTO response = new SigninResponseDTO();
-            response.setAccessToken(accessToken);
-            response.setRefreshToken(refreshToken);
-            response.setExpTime(expTime);
-
-            return response;
+            return new SigninReturnDTO(accessToken, expTime, refreshToken);
         }
         return null;
     }
 
     public User getUserDetails(String email) {return userRepository.findByEmail(email).orElse(null);}
 }
+

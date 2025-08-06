@@ -17,7 +17,7 @@ public class EmailService {
     if (!StringUtils.hasText(token)) {
       throw new IllegalArgumentException("Token cannot be null or empty");
     }
-    String confirmationUrl = "http://localhost:8282/auth/confirm-email?token=" + token;
+    String confirmationUrl = "http://localhost:8282/auth/email/confirm?token=" + token;
     SimpleMailMessage mail = new SimpleMailMessage();
     mail.setTo(toEmail);
     mail.setSubject("Confirme seu email no Urbaniza!");

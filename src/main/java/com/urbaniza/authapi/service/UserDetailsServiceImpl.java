@@ -25,11 +25,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilizador não encontrado com o email: " + email));
 
-        // Verificação crucial para confirmação de email
-        if (!user.isEmailConfirmed()) {
-            throw new UsernameNotFoundException("Confirme seu email antes de fazer login");
-        }
-
         return user;
     }
 }

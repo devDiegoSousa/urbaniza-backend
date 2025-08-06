@@ -3,6 +3,7 @@ package com.urbaniza.authapi.controller;
 import com.urbaniza.authapi.dto.auth.refresh.RefreshTokenResponseDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninRequestDTO;
 import com.urbaniza.authapi.dto.auth.signin.SigninResponseDTO;
+import com.urbaniza.authapi.dto.auth.signin.SigninReturnDTO;
 import com.urbaniza.authapi.dto.auth.signup.SignupRequestDTO;
 import com.urbaniza.authapi.dto.auth.refresh.RefreshTokenRequestDTO;
 import com.urbaniza.authapi.model.User;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -59,25 +61,16 @@ public class AuthController {
     public ResponseEntity<?> signin(
         @Valid @RequestBody SigninRequestDTO signinRequest,
         HttpServletResponse httpResponse) {
+
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(signinRequest.getEmail(), signinRequest.getPassword())
-            );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            SigninReturnDTO signinReturn = authService.signin(signinRequest);
 
-            String accessToken = jwtUtils.generateAccessToken(userDetails);
-            Date expiration = jwtUtils.getExpirationDateFromToken(accessToken);
+            SigninResponseDTO responseBody = new SigninResponseDTO();
+            responseBody.setAccessToken(signinReturn.getAccessToken());
+            responseBody.setExpTime(signinReturn.getExpTime());
 
-            String refreshToken = jwtUtils.generateRefreshToken(userDetails);
-
-
-            SigninResponseDTO response = new SigninResponseDTO();
-            response.setAccessToken(accessToken);
-            response.setExpTime(expiration.getTime());
-
-            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            Cookie refreshTokenCookie = new Cookie("refreshToken", signinReturn.getRefreshToken());
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setSecure(false); //// Em produção, mude para true (requer HTTPS)
             refreshTokenCookie.setPath("/auth");
@@ -85,8 +78,9 @@ public class AuthController {
             // refreshTokenCookie.setSameSite("Strict");
 
             httpResponse.addCookie(refreshTokenCookie);
-            return ResponseEntity.ok(response);
-        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.ok(responseBody);
+
+        } catch (AuthenticationException e) {
             if (e.getMessage().contains("Confirme seu email")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Verifique seu email e confirme sua conta");
             }
